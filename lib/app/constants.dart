@@ -17,7 +17,7 @@ class AppConstants {
   /// want Flutter to call Gemini directly. Do not hardcode keys in source.
   static const geminiApiKey = String.fromEnvironment(
     'GEMINI_API_KEY',
-    defaultValue: 'AQ.Ab8RN6LlkIIuZvn74cybWLdblnf5N1RcuhL-1qrr3P4023tfWw',
+    defaultValue: '',
   );
 
   static const geminiModel = String.fromEnvironment(
