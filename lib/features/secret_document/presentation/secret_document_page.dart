@@ -156,14 +156,15 @@ class _SecretDocumentPageState extends ConsumerState<SecretDocumentPage> {
   @override
   Widget build(BuildContext context) {
     final isMobile = Responsive.isMobile(context);
+    final colors = ClcThemeColors.of(context);
 
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           AppCard(
-            color: const Color(0xFF050505),
-            borderColor: const Color(0x1AFFFFFF),
+            color: colors.field,
+            borderColor: colors.border,
             padding: EdgeInsets.all(isMobile ? 20 : 28),
             child: Wrap(
               spacing: 18,
@@ -171,23 +172,23 @@ class _SecretDocumentPageState extends ConsumerState<SecretDocumentPage> {
               alignment: WrapAlignment.spaceBetween,
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                const Column(
+                Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'ADMIN ONLY',
                       style: TextStyle(
-                        color: AppColors.accent,
+                        color: colors.focus,
                         fontSize: 10,
                         fontWeight: FontWeight.w900,
                         letterSpacing: 3.2,
                       ),
                     ),
-                    SizedBox(height: 10),
+                    const SizedBox(height: 10),
                     Text(
                       'Document Secret',
                       style: TextStyle(
-                        color: Colors.white,
+                        color: colors.textStrong,
                         fontSize: 42,
                         height: 0.96,
                         fontWeight: FontWeight.w300,
@@ -221,11 +222,11 @@ class _SecretDocumentPageState extends ConsumerState<SecretDocumentPage> {
           ),
           const SizedBox(height: 18),
           if (_loading)
-            const _DarkPanel(
+            _DarkPanel(
               child: Center(
                 child: Padding(
-                  padding: EdgeInsets.all(40),
-                  child: CircularProgressIndicator(color: AppColors.accent),
+                  padding: const EdgeInsets.all(40),
+                  child: CircularProgressIndicator(color: colors.focus),
                 ),
               ),
             )
@@ -257,6 +258,7 @@ class _SecretDocumentPageState extends ConsumerState<SecretDocumentPage> {
   Widget _buildForm() {
     final bundle = _selectedBundle;
     final vehicles = bundle?.vehicles ?? const <Vehicle>[];
+    final colors = ClcThemeColors.of(context);
 
     return _DarkPanel(
       child: Column(
@@ -269,11 +271,11 @@ class _SecretDocumentPageState extends ConsumerState<SecretDocumentPage> {
           const SizedBox(height: 18),
           DropdownButtonFormField<String>(
             initialValue: _clientId,
-            decoration: _fieldDecoration('CLIENT'),
-            dropdownColor: const Color(0xFF101011),
-            iconEnabledColor: AppColors.accent,
-            style: const TextStyle(
-              color: Colors.white,
+            decoration: _fieldDecoration(context, 'CLIENT'),
+            dropdownColor: colors.surfaceRaised,
+            iconEnabledColor: colors.focus,
+            style: TextStyle(
+              color: colors.textStrong,
               fontWeight: FontWeight.w800,
             ),
             items: [
@@ -300,11 +302,11 @@ class _SecretDocumentPageState extends ConsumerState<SecretDocumentPage> {
             initialValue: vehicles.any((vehicle) => vehicle.id == _vehicleId)
                 ? _vehicleId
                 : null,
-            decoration: _fieldDecoration('VEHICULE'),
-            dropdownColor: const Color(0xFF101011),
-            iconEnabledColor: AppColors.accent,
-            style: const TextStyle(
-              color: Colors.white,
+            decoration: _fieldDecoration(context, 'VEHICULE'),
+            dropdownColor: colors.surfaceRaised,
+            iconEnabledColor: colors.focus,
+            style: TextStyle(
+              color: colors.textStrong,
               fontWeight: FontWeight.w800,
             ),
             items: [
@@ -339,8 +341,8 @@ class _SecretDocumentPageState extends ConsumerState<SecretDocumentPage> {
           const SizedBox(height: 18),
           TextField(
             controller: _descriptionController,
-            style: const TextStyle(color: Colors.white),
-            decoration: _fieldDecoration('DESCRIPTION'),
+            style: TextStyle(color: colors.textStrong),
+            decoration: _fieldDecoration(context, 'DESCRIPTION'),
           ),
           const SizedBox(height: 14),
           Row(
@@ -349,8 +351,8 @@ class _SecretDocumentPageState extends ConsumerState<SecretDocumentPage> {
                 child: TextField(
                   controller: _quantityController,
                   keyboardType: TextInputType.number,
-                  style: const TextStyle(color: Colors.white),
-                  decoration: _fieldDecoration('QTE'),
+                  style: TextStyle(color: colors.textStrong),
+                  decoration: _fieldDecoration(context, 'QTE'),
                 ),
               ),
               const SizedBox(width: 12),
@@ -358,8 +360,8 @@ class _SecretDocumentPageState extends ConsumerState<SecretDocumentPage> {
                 child: TextField(
                   controller: _priceController,
                   keyboardType: TextInputType.number,
-                  style: const TextStyle(color: Colors.white),
-                  decoration: _fieldDecoration('PRIX'),
+                  style: TextStyle(color: colors.textStrong),
+                  decoration: _fieldDecoration(context, 'PRIX'),
                 ),
               ),
               const SizedBox(width: 12),
@@ -368,8 +370,8 @@ class _SecretDocumentPageState extends ConsumerState<SecretDocumentPage> {
                 width: 56,
                 child: FilledButton(
                   style: FilledButton.styleFrom(
-                    backgroundColor: AppColors.accent,
-                    foregroundColor: Colors.black,
+                    backgroundColor: colors.focus,
+                    foregroundColor: colors.onFocus,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -385,24 +387,25 @@ class _SecretDocumentPageState extends ConsumerState<SecretDocumentPage> {
             controller: _notesController,
             minLines: 3,
             maxLines: 5,
-            style: const TextStyle(color: Colors.white),
-            decoration: _fieldDecoration('NOTES'),
+            style: TextStyle(color: colors.textStrong),
+            decoration: _fieldDecoration(context, 'NOTES'),
           ),
           const SizedBox(height: 12),
           SwitchListTile.adaptive(
             contentPadding: EdgeInsets.zero,
             value: _showVatNumber,
-            activeThumbColor: AppColors.accent,
-            title: const Text(
+            activeThumbColor: colors.focus,
+            activeTrackColor: colors.focus.withValues(alpha: 0.32),
+            title: Text(
               'Afficher les numeros TVA',
               style: TextStyle(
-                color: Colors.white,
+                color: colors.textStrong,
                 fontWeight: FontWeight.w800,
               ),
             ),
-            subtitle: const Text(
+            subtitle: Text(
               'Desactive par defaut comme dans le document cache.',
-              style: TextStyle(color: Color(0xFF71717A), fontSize: 12),
+              style: TextStyle(color: colors.mutedStrong, fontSize: 12),
             ),
             onChanged: (value) => setState(() => _showVatNumber = value),
           ),
@@ -412,6 +415,8 @@ class _SecretDocumentPageState extends ConsumerState<SecretDocumentPage> {
   }
 
   Widget _buildSummary() {
+    final colors = ClcThemeColors.of(context);
+
     return _DarkPanel(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -445,11 +450,11 @@ class _SecretDocumentPageState extends ConsumerState<SecretDocumentPage> {
           const SizedBox(height: 18),
           Row(
             children: [
-              const Expanded(
+              Expanded(
                 child: Text(
                   'TOTAL',
                   style: TextStyle(
-                    color: AppColors.accent,
+                    color: colors.focus,
                     fontSize: 10,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 2.4,
@@ -458,8 +463,8 @@ class _SecretDocumentPageState extends ConsumerState<SecretDocumentPage> {
               ),
               Text(
                 formatMoney(_total),
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: colors.textStrong,
                   fontSize: 28,
                   fontWeight: FontWeight.w300,
                 ),
@@ -538,24 +543,26 @@ DocumentVehicle _vehicleFromVehicle(Vehicle vehicle) {
   );
 }
 
-InputDecoration _fieldDecoration(String label) {
+InputDecoration _fieldDecoration(BuildContext context, String label) {
+  final colors = ClcThemeColors.of(context);
+
   return InputDecoration(
     labelText: label,
-    labelStyle: const TextStyle(
-      color: Color(0xFF71717A),
+    labelStyle: TextStyle(
+      color: colors.mutedStrong,
       fontSize: 10,
       fontWeight: FontWeight.w900,
       letterSpacing: 2.2,
     ),
     filled: true,
-    fillColor: const Color(0xFF101011),
+    fillColor: colors.surfaceRaised,
     enabledBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(8),
-      borderSide: const BorderSide(color: Color(0x1AFFFFFF)),
+      borderSide: BorderSide(color: colors.border),
     ),
     focusedBorder: OutlineInputBorder(
       borderRadius: BorderRadius.circular(8),
-      borderSide: const BorderSide(color: AppColors.accent),
+      borderSide: BorderSide(color: colors.focus),
     ),
     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 15),
   );
@@ -568,9 +575,11 @@ class _DarkPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return AppCard(
-      color: const Color(0xFF050505),
-      borderColor: const Color(0x1AFFFFFF),
+      color: colors.field,
+      borderColor: colors.border,
       padding: const EdgeInsets.all(22),
       child: child,
     );
@@ -585,14 +594,16 @@ class _PanelTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return Row(
       children: [
-        Icon(icon, color: AppColors.accent, size: 18),
+        Icon(icon, color: colors.focus, size: 18),
         const SizedBox(width: 10),
         Text(
           label.toUpperCase(),
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: colors.textStrong,
             fontSize: 12,
             fontWeight: FontWeight.w900,
             letterSpacing: 2.4,
@@ -616,22 +627,22 @@ class _VehicleSizeChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(8),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 11),
         decoration: BoxDecoration(
-          color: active ? AppColors.accent : Colors.transparent,
+          color: active ? colors.focus : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: active ? AppColors.accent : const Color(0x1AFFFFFF),
-          ),
+          border: Border.all(color: active ? colors.focus : colors.border),
         ),
         child: Text(
           label.toUpperCase(),
           style: TextStyle(
-            color: active ? Colors.black : const Color(0xFFA1A1AA),
+            color: active ? colors.onFocus : colors.muted,
             fontSize: 10,
             fontWeight: FontWeight.w900,
             letterSpacing: 1.7,
@@ -655,21 +666,23 @@ class _InfoBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFF101011),
+        color: colors.surfaceRaised,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0x1AFFFFFF)),
+        border: Border.all(color: colors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             label,
-            style: const TextStyle(
-              color: Color(0xFF71717A),
+            style: TextStyle(
+              color: colors.mutedStrong,
               fontSize: 10,
               fontWeight: FontWeight.w900,
               letterSpacing: 2,
@@ -678,8 +691,8 @@ class _InfoBlock extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             value.trim().isEmpty ? '-' : value,
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: colors.textStrong,
               fontSize: 15,
               fontWeight: FontWeight.w900,
             ),
@@ -688,8 +701,8 @@ class _InfoBlock extends StatelessWidget {
             const SizedBox(height: 6),
             Text(
               detail,
-              style: const TextStyle(
-                color: Color(0xFF71717A),
+              style: TextStyle(
+                color: colors.mutedStrong,
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
               ),
@@ -714,6 +727,8 @@ class _SecretLineRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return Row(
       children: [
         Expanded(
@@ -722,8 +737,8 @@ class _SecretLineRow extends StatelessWidget {
             children: [
               Text(
                 line.description,
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: colors.textStrong,
                   fontSize: 14,
                   fontWeight: FontWeight.w800,
                 ),
@@ -731,8 +746,8 @@ class _SecretLineRow extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 '${line.quantity} x ${formatMoney(line.unitPrice)}',
-                style: const TextStyle(
-                  color: Color(0xFF71717A),
+                style: TextStyle(
+                  color: colors.mutedStrong,
                   fontSize: 12,
                   fontWeight: FontWeight.w700,
                 ),
@@ -742,8 +757,8 @@ class _SecretLineRow extends StatelessWidget {
         ),
         Text(
           formatMoney(line.quantity * line.unitPrice),
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: colors.textStrong,
             fontSize: 14,
             fontWeight: FontWeight.w900,
           ),
@@ -751,7 +766,7 @@ class _SecretLineRow extends StatelessWidget {
         IconButton(
           tooltip: 'Supprimer',
           onPressed: canRemove ? onRemove : null,
-          icon: const Icon(Icons.close_rounded, color: Color(0xFF71717A)),
+          icon: Icon(Icons.close_rounded, color: colors.mutedStrong),
         ),
       ],
     );
@@ -763,14 +778,16 @@ class _SoftDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return Container(
       height: 1,
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
             Colors.transparent,
-            Color(0x33E5E7EB),
-            Color(0x33E5E7EB),
+            colors.border,
+            colors.border,
             Colors.transparent,
           ],
           stops: [0, 0.1, 0.9, 1],

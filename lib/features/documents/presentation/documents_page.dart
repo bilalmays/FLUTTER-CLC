@@ -35,14 +35,15 @@ class _DocumentsPageState extends State<DocumentsPage> {
   @override
   Widget build(BuildContext context) {
     final isMobile = Responsive.isMobile(context);
+    final colors = ClcThemeColors.of(context);
 
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           AppCard(
-            color: const Color(0xFF050505),
-            borderColor: const Color(0x1AFFFFFF),
+            color: colors.field,
+            borderColor: colors.border,
             padding: EdgeInsets.all(isMobile ? 20 : 28),
             child: _DocumentsHeader(
               eyebrow: _activeModule == null ? 'Documents' : 'Module document',
@@ -98,13 +99,14 @@ class _DocumentsHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
     final text = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           eyebrow.toUpperCase(),
-          style: const TextStyle(
-            color: AppColors.accent,
+          style: TextStyle(
+            color: colors.focus,
             fontSize: 10,
             fontWeight: FontWeight.w900,
             letterSpacing: 3,
@@ -113,8 +115,8 @@ class _DocumentsHeader extends StatelessWidget {
         const SizedBox(height: 12),
         Text(
           title,
-          style: const TextStyle(
-            color: Colors.white,
+          style: TextStyle(
+            color: colors.textStrong,
             fontSize: 38,
             height: 0.95,
             fontWeight: FontWeight.w300,
@@ -123,8 +125,8 @@ class _DocumentsHeader extends StatelessWidget {
         const SizedBox(height: 12),
         Text(
           subtitle,
-          style: const TextStyle(
-            color: Color(0xFFA1A1AA),
+          style: TextStyle(
+            color: colors.muted,
             fontSize: 15,
             height: 1.45,
             fontWeight: FontWeight.w500,
@@ -189,10 +191,12 @@ class _DocumentModuleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return AppCard(
       onTap: onTap,
-      color: const Color(0xFF050505),
-      borderColor: const Color(0x1AFFFFFF),
+      color: colors.field,
+      borderColor: colors.border,
       padding: const EdgeInsets.all(22),
       child: ConstrainedBox(
         constraints: const BoxConstraints(minHeight: 178),
@@ -205,33 +209,32 @@ class _DocumentModuleCard extends StatelessWidget {
                   width: 52,
                   height: 52,
                   decoration: BoxDecoration(
-                    color: AppColors.accent.withValues(alpha: 0.10),
+                    color: colors.focus.withValues(
+                      alpha: colors.isLight ? 0.07 : 0.10,
+                    ),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: AppColors.accent.withValues(alpha: 0.30),
+                      color: colors.focus.withValues(alpha: 0.30),
                     ),
                   ),
-                  child: Icon(module.icon, color: AppColors.accent),
+                  child: Icon(module.icon, color: colors.focus),
                 ),
                 const Spacer(),
-                const Icon(
-                  Icons.arrow_forward_rounded,
-                  color: Color(0xFF71717A),
-                ),
+                Icon(Icons.arrow_forward_rounded, color: colors.mutedStrong),
               ],
             ),
             const SizedBox(height: 24),
             Text(
               module.label.toUpperCase(),
               style: AppTextStyles.cardTitle.copyWith(
-                color: Colors.white,
+                color: colors.textStrong,
                 fontSize: 17,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               module.note,
-              style: AppTextStyles.body.copyWith(color: Colors.white54),
+              style: AppTextStyles.body.copyWith(color: colors.muted),
             ),
           ],
         ),

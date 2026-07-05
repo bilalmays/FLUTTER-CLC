@@ -9,6 +9,7 @@ class DashboardPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isMobile = Responsive.isMobile(context);
+    final colors = ClcThemeColors.of(context);
 
     return SingleChildScrollView(
       child: Column(
@@ -18,11 +19,11 @@ class DashboardPage extends StatelessWidget {
             spacing: 18,
             runSpacing: 12,
             crossAxisAlignment: WrapCrossAlignment.end,
-            children: const [
+            children: [
               Text(
                 'CRM',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: colors.textStrong,
                   fontSize: 48,
                   height: 0.96,
                   fontWeight: FontWeight.w300,
@@ -30,11 +31,11 @@ class DashboardPage extends StatelessWidget {
                 ),
               ),
               Padding(
-                padding: EdgeInsets.only(bottom: 7),
+                padding: const EdgeInsets.only(bottom: 7),
                 child: Text(
                   'CAR LUXE CLEANING',
                   style: TextStyle(
-                    color: AppColors.accent,
+                    color: colors.focus,
                     fontSize: 10,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 3.2,
@@ -46,7 +47,11 @@ class DashboardPage extends StatelessWidget {
           const SizedBox(height: 30),
           LayoutBuilder(
             builder: (context, constraints) {
-              final columns = isMobile ? 1 : constraints.maxWidth < 980 ? 2 : 3;
+              final columns = isMobile
+                  ? 1
+                  : constraints.maxWidth < 980
+                  ? 2
+                  : 3;
               final gap = 16.0;
               final width =
                   (constraints.maxWidth - (gap * (columns - 1))) / columns;
@@ -129,6 +134,8 @@ class _DashboardTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return SizedBox(
       width: width,
       child: Material(
@@ -139,19 +146,20 @@ class _DashboardTile extends StatelessWidget {
             constraints: const BoxConstraints(minHeight: 142),
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: const Color(0xFF09090A),
-              border: Border.all(color: const Color(0x1AFFFFFF)),
+              color: colors.field,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: colors.border),
             ),
             child: Stack(
               children: [
-                const Positioned(
+                Positioned(
                   left: 0,
                   right: 0,
                   top: 0,
                   child: SizedBox(
                     height: 3,
                     child: DecoratedBox(
-                      decoration: BoxDecoration(color: Color(0x1AFFFFFF)),
+                      decoration: BoxDecoration(color: colors.border),
                     ),
                   ),
                 ),
@@ -162,17 +170,17 @@ class _DashboardTile extends StatelessWidget {
                       width: 48,
                       height: 48,
                       decoration: BoxDecoration(
-                        color: Colors.black,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0x1AFFFFFF)),
+                        color: colors.surfaceRaised,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: colors.border),
                       ),
-                      child: Icon(icon, color: AppColors.accent, size: 20),
+                      child: Icon(icon, color: colors.focus, size: 20),
                     ),
                     const SizedBox(height: 22),
                     Text(
                       title.toUpperCase(),
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: colors.textStrong,
                         fontSize: 13,
                         fontWeight: FontWeight.w900,
                         letterSpacing: 2.2,
@@ -181,8 +189,8 @@ class _DashboardTile extends StatelessWidget {
                     const SizedBox(height: 10),
                     Text(
                       description,
-                      style: const TextStyle(
-                        color: Color(0xFF71717A),
+                      style: TextStyle(
+                        color: colors.mutedStrong,
                         fontSize: 12,
                         height: 1.45,
                         fontWeight: FontWeight.w600,

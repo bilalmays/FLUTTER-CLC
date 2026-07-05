@@ -137,6 +137,7 @@ class _SubscriptionsPageState extends ConsumerState<SubscriptionsPage> {
   @override
   Widget build(BuildContext context) {
     final isMobile = Responsive.isMobile(context);
+    final colors = ClcThemeColors.of(context);
     final activeTitle = switch (_activeModule) {
       CrmModule.subscriptions => 'Abonnements',
       CrmModule.courtesy => 'Voiture de courtoisie',
@@ -155,7 +156,7 @@ class _SubscriptionsPageState extends ConsumerState<SubscriptionsPage> {
               if (_activeModule != null)
                 TextButton.icon(
                   style: TextButton.styleFrom(
-                    foregroundColor: const Color(0xFF71717A),
+                    foregroundColor: colors.mutedStrong,
                     textStyle: const TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w900,
@@ -168,8 +169,8 @@ class _SubscriptionsPageState extends ConsumerState<SubscriptionsPage> {
                 ),
               Text(
                 activeTitle,
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: colors.textStrong,
                   fontSize: 46,
                   height: 0.96,
                   fontWeight: FontWeight.w300,
@@ -234,9 +235,11 @@ class _SubscriptionsPageState extends ConsumerState<SubscriptionsPage> {
   }
 
   Widget _buildSubscriptionsPanel(bool isMobile) {
+    final colors = ClcThemeColors.of(context);
+
     return AppCard(
-      color: const Color(0xFF18181B),
-      borderColor: const Color(0x1CFFFFFF),
+      color: colors.field,
+      borderColor: colors.border,
       padding: EdgeInsets.all(isMobile ? 20 : 28),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -247,23 +250,23 @@ class _SubscriptionsPageState extends ConsumerState<SubscriptionsPage> {
             alignment: WrapAlignment.spaceBetween,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              const Column(
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'SUIVI ABONNEMENT',
                     style: TextStyle(
-                      color: AppColors.accent,
+                      color: colors.focus,
                       fontSize: 10,
                       fontWeight: FontWeight.w900,
                       letterSpacing: 3.2,
                     ),
                   ),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Text(
                     'Clients abonnes',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: colors.textStrong,
                       fontSize: 40,
                       height: 0.98,
                       fontWeight: FontWeight.w300,
@@ -294,7 +297,7 @@ class _SubscriptionsPageState extends ConsumerState<SubscriptionsPage> {
             ),
           ],
           const SizedBox(height: 22),
-          const Divider(color: Color(0x33E5E7EB)),
+          Divider(color: colors.border),
           const SizedBox(height: 22),
           if (_loading)
             const _LoadingState()
@@ -353,6 +356,8 @@ class _CrmModuleCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return SizedBox(
       width: width,
       child: Material(
@@ -363,19 +368,20 @@ class _CrmModuleCard extends StatelessWidget {
             constraints: const BoxConstraints(minHeight: 138),
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: const Color(0xFF09090A),
-              border: Border.all(color: const Color(0x1AFFFFFF)),
+              color: colors.field,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: colors.border),
             ),
             child: Stack(
               children: [
-                const Positioned(
+                Positioned(
                   left: 0,
                   right: 0,
                   top: 0,
                   child: SizedBox(
                     height: 3,
                     child: DecoratedBox(
-                      decoration: BoxDecoration(color: Color(0x1AFFFFFF)),
+                      decoration: BoxDecoration(color: colors.border),
                     ),
                   ),
                 ),
@@ -386,17 +392,17 @@ class _CrmModuleCard extends StatelessWidget {
                       width: 48,
                       height: 48,
                       decoration: BoxDecoration(
-                        color: Colors.black,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0x1AFFFFFF)),
+                        color: colors.surfaceRaised,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: colors.border),
                       ),
-                      child: Icon(icon, color: AppColors.accent, size: 21),
+                      child: Icon(icon, color: colors.focus, size: 21),
                     ),
                     const SizedBox(height: 20),
                     Text(
                       label.toUpperCase(),
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: colors.textStrong,
                         fontSize: 13,
                         fontWeight: FontWeight.w900,
                         letterSpacing: 2.2,
@@ -405,8 +411,8 @@ class _CrmModuleCard extends StatelessWidget {
                     const SizedBox(height: 9),
                     Text(
                       note,
-                      style: const TextStyle(
-                        color: Color(0xFF71717A),
+                      style: TextStyle(
+                        color: colors.mutedStrong,
                         fontSize: 12,
                         height: 1.45,
                         fontWeight: FontWeight.w600,
@@ -428,6 +434,7 @@ class _CourtesyPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
     const cars = [
       ('Fiat 500', '1-CLC-001', 'Disponible'),
       ('VW Polo', '1-CLC-002', 'Reservee'),
@@ -435,26 +442,26 @@ class _CourtesyPanel extends StatelessWidget {
     ];
 
     return AppCard(
-      color: const Color(0xFF18181B),
-      borderColor: const Color(0x1CFFFFFF),
+      color: colors.field,
+      borderColor: colors.border,
       padding: const EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
+          Text(
             'FLOTTE INTERNE',
             style: TextStyle(
-              color: AppColors.accent,
+              color: colors.focus,
               fontSize: 10,
               fontWeight: FontWeight.w900,
               letterSpacing: 3.2,
             ),
           ),
           const SizedBox(height: 8),
-          const Text(
+          Text(
             'Voitures de courtoisie',
             style: TextStyle(
-              color: Colors.white,
+              color: colors.textStrong,
               fontSize: 36,
               height: 0.98,
               fontWeight: FontWeight.w300,
@@ -480,17 +487,15 @@ class _CourtesyPanel extends StatelessWidget {
                       child: Container(
                         padding: const EdgeInsets.all(18),
                         decoration: BoxDecoration(
-                          color: const Color(0xFF202024),
-                          borderRadius: BorderRadius.circular(18),
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.11),
-                          ),
+                          color: colors.surfaceRaised,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: colors.border),
                         ),
                         child: Row(
                           children: [
-                            const Icon(
+                            Icon(
                               Icons.directions_car_filled_outlined,
-                              color: AppColors.accent,
+                              color: colors.focus,
                               size: 22,
                             ),
                             const SizedBox(width: 14),
@@ -500,8 +505,8 @@ class _CourtesyPanel extends StatelessWidget {
                                 children: [
                                   Text(
                                     car.$1,
-                                    style: const TextStyle(
-                                      color: Colors.white,
+                                    style: TextStyle(
+                                      color: colors.textStrong,
                                       fontSize: 15,
                                       fontWeight: FontWeight.w900,
                                     ),
@@ -509,8 +514,8 @@ class _CourtesyPanel extends StatelessWidget {
                                   const SizedBox(height: 4),
                                   Text(
                                     car.$2,
-                                    style: const TextStyle(
-                                      color: Color(0xFF71717A),
+                                    style: TextStyle(
+                                      color: colors.mutedStrong,
                                       fontSize: 12,
                                       fontWeight: FontWeight.w800,
                                     ),
@@ -520,8 +525,8 @@ class _CourtesyPanel extends StatelessWidget {
                             ),
                             StatusBadge(
                               label: car.$3,
-                              color: AppColors.accent.withValues(alpha: 0.12),
-                              textColor: AppColors.accent,
+                              color: colors.focus.withValues(alpha: 0.12),
+                              textColor: colors.focus,
                             ),
                           ],
                         ),
@@ -556,6 +561,7 @@ class _HeaderActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
     final tabs = {
       SubscriptionView.list: 'Liste',
       SubscriptionView.timeline: '12 mois',
@@ -570,8 +576,9 @@ class _HeaderActions extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(4),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.06),
-            borderRadius: BorderRadius.circular(16),
+            color: colors.surfaceSoft,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: colors.border),
           ),
           child: Wrap(
             spacing: 4,
@@ -581,19 +588,17 @@ class _HeaderActions extends StatelessWidget {
                   label: Text(entry.value.toUpperCase()),
                   selected: view == entry.key,
                   onSelected: (_) => onViewChanged(entry.key),
-                  selectedColor: Colors.white,
+                  selectedColor: colors.focus,
                   backgroundColor: Colors.transparent,
                   showCheckmark: false,
                   labelStyle: TextStyle(
-                    color: view == entry.key
-                        ? AppColors.navy
-                        : const Color(0xFFA1A1AA),
+                    color: view == entry.key ? colors.onFocus : colors.muted,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 1.4,
                     fontSize: 10,
                   ),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(13),
+                    borderRadius: BorderRadius.circular(8),
                     side: BorderSide.none,
                   ),
                 ),
@@ -638,28 +643,30 @@ class _CrmToolbarButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+    final background = primary ? colors.action : colors.field;
+    final foreground = primary ? colors.onAction : colors.textStrong;
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(primary ? 14 : 17),
+        borderRadius: BorderRadius.circular(8),
         onTap: onPressed,
         child: Container(
           constraints: BoxConstraints(minHeight: primary ? 52 : 58),
           padding: const EdgeInsets.symmetric(horizontal: 20),
           decoration: BoxDecoration(
-            color: primary
-                ? Colors.white
-                : Colors.white.withValues(alpha: 0.045),
-            borderRadius: BorderRadius.circular(primary ? 14 : 17),
+            color: background,
+            borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: primary
-                  ? Colors.transparent
-                  : Colors.white.withValues(alpha: 0.12),
+              color: primary ? Colors.transparent : colors.border,
             ),
             boxShadow: primary
                 ? [
                     BoxShadow(
-                      color: Colors.white.withValues(alpha: 0.08),
+                      color: colors.action.withValues(
+                        alpha: colors.isLight ? 0.10 : 0.08,
+                      ),
                       blurRadius: 20,
                       offset: const Offset(0, 8),
                     ),
@@ -669,16 +676,12 @@ class _CrmToolbarButton extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                icon,
-                size: 16,
-                color: primary ? AppColors.navy : Colors.white,
-              ),
+              Icon(icon, size: 16, color: foreground),
               const SizedBox(width: 9),
               Text(
                 label.toUpperCase(),
                 style: TextStyle(
-                  color: primary ? AppColors.navy : Colors.white,
+                  color: foreground,
                   fontSize: 11,
                   fontWeight: FontWeight.w900,
                   letterSpacing: 1.8,
@@ -747,10 +750,15 @@ class _NewSubscriptionDialogState extends State<_NewSubscriptionDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return AlertDialog(
-      backgroundColor: AppColors.surface,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      title: Text('Nouvel abonnement', style: AppTextStyles.cardTitle),
+      backgroundColor: colors.surfaceRaised,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      title: Text(
+        'Nouvel abonnement',
+        style: AppTextStyles.cardTitle.copyWith(color: colors.textStrong),
+      ),
       content: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 520),
         child: Column(
@@ -800,7 +808,10 @@ class _NewSubscriptionDialogState extends State<_NewSubscriptionDialog> {
               controller: _amountController,
               keyboardType: TextInputType.number,
               decoration: const InputDecoration(labelText: 'MONTANT PAYE'),
-              style: const TextStyle(fontWeight: FontWeight.w800),
+              style: TextStyle(
+                color: colors.textStrong,
+                fontWeight: FontWeight.w800,
+              ),
             ),
             const SizedBox(height: 14),
             InkWell(
@@ -821,7 +832,10 @@ class _NewSubscriptionDialogState extends State<_NewSubscriptionDialog> {
                     Expanded(
                       child: Text(
                         formatDate(_startDate),
-                        style: const TextStyle(fontWeight: FontWeight.w800),
+                        style: TextStyle(
+                          color: colors.textStrong,
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
                     ),
                     const Icon(Icons.calendar_today_outlined),
@@ -838,7 +852,10 @@ class _NewSubscriptionDialogState extends State<_NewSubscriptionDialog> {
           child: const Text('Annuler'),
         ),
         FilledButton(
-          style: FilledButton.styleFrom(backgroundColor: AppColors.navy),
+          style: FilledButton.styleFrom(
+            backgroundColor: colors.focus,
+            foregroundColor: colors.onFocus,
+          ),
           onPressed: _submit,
           child: const Text('Creer'),
         ),
@@ -927,20 +944,22 @@ class _StatTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return SizedBox(
       width: width,
       child: Container(
         constraints: const BoxConstraints(minHeight: 116),
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          color: const Color(0xFF202024),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.11)),
+          color: colors.surfaceRaised,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: colors.border),
         ),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(icon, size: 26, color: AppColors.accent),
+            Icon(icon, size: 26, color: colors.focus),
             const SizedBox(width: 14),
             Expanded(
               child: Column(
@@ -948,8 +967,8 @@ class _StatTile extends StatelessWidget {
                 children: [
                   Text(
                     label.toUpperCase(),
-                    style: const TextStyle(
-                      color: Color(0xFF71717A),
+                    style: TextStyle(
+                      color: colors.mutedStrong,
                       fontSize: 10,
                       fontWeight: FontWeight.w900,
                       letterSpacing: 2.2,
@@ -958,21 +977,21 @@ class _StatTile extends StatelessWidget {
                   const SizedBox(height: 6),
                   Text(
                     value,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 24,
                       height: 1,
                       fontWeight: FontWeight.w900,
-                      color: Colors.white,
+                      color: colors.textStrong,
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
                     detail,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 12,
                       height: 1.3,
                       fontWeight: FontWeight.w800,
-                      color: Color(0xFFA1A1AA),
+                      color: colors.muted,
                     ),
                   ),
                 ],
@@ -1000,14 +1019,16 @@ class _SubscriptionList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     if (bundles.isEmpty) {
-      return const AppCard(
-        color: Color(0xFF202024),
-        borderColor: Color(0x1CFFFFFF),
+      return AppCard(
+        color: colors.surfaceRaised,
+        borderColor: colors.border,
         child: Text(
           'Aucun abonnement dans cette vue.',
           style: TextStyle(
-            color: Color(0xFFA1A1AA),
+            color: colors.muted,
             fontSize: 14,
             fontWeight: FontWeight.w700,
           ),
@@ -1022,8 +1043,8 @@ class _SubscriptionList extends StatelessWidget {
         if (compactHeader != null) ...[
           Text(
             compactHeader!.toUpperCase(),
-            style: const TextStyle(
-              color: AppColors.accent,
+            style: TextStyle(
+              color: colors.focus,
               fontSize: 10,
               fontWeight: FontWeight.w900,
               letterSpacing: 2.5,
@@ -1062,6 +1083,7 @@ class _SubscriptionRow extends StatelessWidget {
     final meta = metaForPlan(bundle.subscription.plan);
     final health = _healthFor(bundle);
     final progress = bundle.progress;
+    final colors = ClcThemeColors.of(context);
 
     final details = [
       _InfoBlock(
@@ -1091,9 +1113,9 @@ class _SubscriptionRow extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(isCompact ? 18 : 22),
       decoration: BoxDecoration(
-        color: const Color(0xFF202024),
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.11)),
+        color: colors.surfaceRaised,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: colors.border),
       ),
       child: isCompact
           ? Column(
@@ -1104,7 +1126,7 @@ class _SubscriptionRow extends StatelessWidget {
                 LinearProgressIndicator(
                   value: progress,
                   color: meta.color,
-                  backgroundColor: Colors.white.withValues(alpha: 0.08),
+                  backgroundColor: colors.border,
                   minHeight: 8,
                 ),
                 const SizedBox(height: 16),
@@ -1139,7 +1161,7 @@ class _SubscriptionRow extends StatelessWidget {
                       LinearProgressIndicator(
                         value: progress,
                         color: meta.color,
-                        backgroundColor: Colors.white.withValues(alpha: 0.08),
+                        backgroundColor: colors.border,
                         minHeight: 8,
                       ),
                       const SizedBox(height: 18),
@@ -1165,6 +1187,8 @@ class _SubscriptionIdentity extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return Row(
       children: [
         Container(
@@ -1182,8 +1206,8 @@ class _SubscriptionIdentity extends StatelessWidget {
             children: [
               Text(
                 bundle.client.name,
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: colors.textStrong,
                   fontSize: 16,
                   fontWeight: FontWeight.w900,
                 ),
@@ -1191,8 +1215,8 @@ class _SubscriptionIdentity extends StatelessWidget {
               const SizedBox(height: 6),
               Text(
                 '${bundle.vehicle.displayName} - ${bundle.vehicle.displayPlate}',
-                style: const TextStyle(
-                  color: Color(0xFFA1A1AA),
+                style: TextStyle(
+                  color: colors.muted,
                   fontSize: 13,
                   height: 1.35,
                   fontWeight: FontWeight.w700,
@@ -1201,8 +1225,8 @@ class _SubscriptionIdentity extends StatelessWidget {
               const SizedBox(height: 8),
               StatusBadge(
                 label: meta.label,
-                color: AppColors.accent.withValues(alpha: 0.12),
-                textColor: AppColors.accent,
+                color: colors.focus.withValues(alpha: 0.12),
+                textColor: colors.focus,
               ),
             ],
           ),
@@ -1225,18 +1249,21 @@ class _CrmMiniButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return SizedBox(
       width: double.infinity,
       child: FilledButton.icon(
         style: FilledButton.styleFrom(
           minimumSize: const Size(0, 44),
-          backgroundColor: Colors.white.withValues(alpha: 0.08),
-          foregroundColor: Colors.white,
-          disabledBackgroundColor: Colors.white.withValues(alpha: 0.04),
-          disabledForegroundColor: Colors.white.withValues(alpha: 0.38),
+          backgroundColor: colors.field,
+          foregroundColor: colors.textStrong,
+          disabledBackgroundColor: colors.field.withValues(alpha: 0.45),
+          disabledForegroundColor: colors.muted.withValues(alpha: 0.55),
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
+            side: BorderSide(color: colors.border),
           ),
           textStyle: const TextStyle(
             fontSize: 10,
@@ -1262,6 +1289,8 @@ class _InfoBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return ConstrainedBox(
       constraints: const BoxConstraints(minWidth: 130),
       child: Column(
@@ -1269,8 +1298,8 @@ class _InfoBlock extends StatelessWidget {
         children: [
           Text(
             label.toUpperCase(),
-            style: const TextStyle(
-              color: Color(0xFF71717A),
+            style: TextStyle(
+              color: colors.mutedStrong,
               fontSize: 10,
               fontWeight: FontWeight.w900,
               letterSpacing: 2.2,
@@ -1280,20 +1309,20 @@ class _InfoBlock extends StatelessWidget {
           child ??
               Text(
                 value ?? '-',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w900,
-                  color: Colors.white,
+                  color: colors.textStrong,
                 ),
               ),
           if (detail != null) ...[
             const SizedBox(height: 6),
             Text(
               detail!,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w700,
-                color: Color(0xFFA1A1AA),
+                color: colors.muted,
               ),
             ),
           ],
@@ -1311,6 +1340,7 @@ class _TimelineView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final months = List.generate(12, (index) => DateTime(2026, index + 1));
+    final colors = ClcThemeColors.of(context);
 
     return SingleChildScrollView(
       key: const ValueKey('timeline'),
@@ -1318,9 +1348,9 @@ class _TimelineView extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          color: const Color(0xFF202024),
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: Colors.white.withValues(alpha: 0.11)),
+          color: colors.surfaceRaised,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: colors.border),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1334,8 +1364,8 @@ class _TimelineView extends StatelessWidget {
                     child: Text(
                       DateFormatMonth.label(month),
                       textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        color: Color(0xFF71717A),
+                      style: TextStyle(
+                        color: colors.mutedStrong,
                         fontSize: 10,
                         fontWeight: FontWeight.w900,
                         letterSpacing: 1.2,
@@ -1363,6 +1393,8 @@ class _TimelineRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = metaForPlan(bundle.subscription.plan).color;
+    final colors = ClcThemeColors.of(context);
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 7),
       child: Row(
@@ -1373,8 +1405,8 @@ class _TimelineRow extends StatelessWidget {
               bundle.client.name,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: colors.textStrong,
                 fontWeight: FontWeight.w900,
               ),
             ),
@@ -1385,11 +1417,9 @@ class _TimelineRow extends StatelessWidget {
               height: 28,
               margin: const EdgeInsets.symmetric(horizontal: 4),
               decoration: BoxDecoration(
-                color: _isActiveInMonth(bundle, month)
-                    ? color
-                    : Colors.white.withValues(alpha: 0.055),
+                color: _isActiveInMonth(bundle, month) ? color : colors.field,
                 borderRadius: BorderRadius.circular(999),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
+                border: Border.all(color: colors.border),
               ),
             ),
         ],
@@ -1425,10 +1455,12 @@ class _LoadingState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    final colors = ClcThemeColors.of(context);
+
+    return Center(
       child: Padding(
-        padding: EdgeInsets.all(40),
-        child: CircularProgressIndicator(color: AppColors.accent),
+        padding: const EdgeInsets.all(40),
+        child: CircularProgressIndicator(color: colors.focus),
       ),
     );
   }
@@ -1441,15 +1473,14 @@ class _ErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return AppCard(
-      color: const Color(0xFF202024),
-      borderColor: Color(0x3DB42318),
+      color: colors.danger.withValues(alpha: 0.08),
+      borderColor: colors.danger.withValues(alpha: 0.25),
       child: Text(
         message,
-        style: const TextStyle(
-          color: Color(0xFFFFB4AB),
-          fontWeight: FontWeight.w800,
-        ),
+        style: TextStyle(color: colors.danger, fontWeight: FontWeight.w800),
       ),
     );
   }

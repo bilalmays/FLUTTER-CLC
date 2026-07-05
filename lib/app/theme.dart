@@ -1,5 +1,163 @@
 import 'package:flutter/material.dart';
 
+@immutable
+class ClcThemeColors extends ThemeExtension<ClcThemeColors> {
+  const ClcThemeColors({
+    required this.isLight,
+    required this.bg,
+    required this.shell,
+    required this.surface,
+    required this.surfaceSoft,
+    required this.surfaceRaised,
+    required this.field,
+    required this.text,
+    required this.textStrong,
+    required this.muted,
+    required this.mutedStrong,
+    required this.border,
+    required this.borderStrong,
+    required this.focus,
+    required this.onFocus,
+    required this.action,
+    required this.onAction,
+    required this.danger,
+  });
+
+  final bool isLight;
+  final Color bg;
+  final Color shell;
+  final Color surface;
+  final Color surfaceSoft;
+  final Color surfaceRaised;
+  final Color field;
+  final Color text;
+  final Color textStrong;
+  final Color muted;
+  final Color mutedStrong;
+  final Color border;
+  final Color borderStrong;
+  final Color focus;
+  final Color onFocus;
+  final Color action;
+  final Color onAction;
+  final Color danger;
+
+  static const dark = ClcThemeColors(
+    isLight: false,
+    bg: Color(0xFF050505),
+    shell: Color(0xFF0A0A0A),
+    surface: Color(0xFF1F1F1F),
+    surfaceSoft: Color(0xFF161616),
+    surfaceRaised: Color(0xFF232323),
+    field: Color(0x0AFFFFFF),
+    text: Color(0xFFF4F4F5),
+    textStrong: Color(0xFFFAFAFA),
+    muted: Color(0xFFA1A1AA),
+    mutedStrong: Color(0xFF71717A),
+    border: Color(0x1AFFFFFF),
+    borderStrong: Color(0xFF46464A),
+    focus: Color(0xFFAFF700),
+    onFocus: Color(0xFF050505),
+    action: Color(0xFFF4F4F5),
+    onAction: Color(0xFF050505),
+    danger: Color(0xFFFB7185),
+  );
+
+  static const light = ClcThemeColors(
+    isLight: true,
+    bg: Color(0xFFE5E7EB),
+    shell: Color(0xFFECEFF3),
+    surface: Color(0xFFF4F4F5),
+    surfaceSoft: Color(0xFFF4F4F5),
+    surfaceRaised: Color(0xFFFFFFFF),
+    field: Color(0xFFFFFFFF),
+    text: Color(0xFF17191D),
+    textStrong: Color(0xFF0B0C0F),
+    muted: Color(0xFF555B66),
+    mutedStrong: Color(0xFF444B56),
+    border: Color(0xFFE4E4E7),
+    borderStrong: Color(0xFFD1D5DB),
+    focus: Color(0xFF0B0C0F),
+    onFocus: Color(0xFFF4F6F8),
+    action: Color(0xFF0B0C0F),
+    onAction: Color(0xFFF4F6F8),
+    danger: Color(0xFF8F1D24),
+  );
+
+  static ClcThemeColors of(BuildContext context) {
+    return Theme.of(context).extension<ClcThemeColors>() ??
+        (Theme.of(context).brightness == Brightness.light ? light : dark);
+  }
+
+  @override
+  ClcThemeColors copyWith({
+    bool? isLight,
+    Color? bg,
+    Color? shell,
+    Color? surface,
+    Color? surfaceSoft,
+    Color? surfaceRaised,
+    Color? field,
+    Color? text,
+    Color? textStrong,
+    Color? muted,
+    Color? mutedStrong,
+    Color? border,
+    Color? borderStrong,
+    Color? focus,
+    Color? onFocus,
+    Color? action,
+    Color? onAction,
+    Color? danger,
+  }) {
+    return ClcThemeColors(
+      isLight: isLight ?? this.isLight,
+      bg: bg ?? this.bg,
+      shell: shell ?? this.shell,
+      surface: surface ?? this.surface,
+      surfaceSoft: surfaceSoft ?? this.surfaceSoft,
+      surfaceRaised: surfaceRaised ?? this.surfaceRaised,
+      field: field ?? this.field,
+      text: text ?? this.text,
+      textStrong: textStrong ?? this.textStrong,
+      muted: muted ?? this.muted,
+      mutedStrong: mutedStrong ?? this.mutedStrong,
+      border: border ?? this.border,
+      borderStrong: borderStrong ?? this.borderStrong,
+      focus: focus ?? this.focus,
+      onFocus: onFocus ?? this.onFocus,
+      action: action ?? this.action,
+      onAction: onAction ?? this.onAction,
+      danger: danger ?? this.danger,
+    );
+  }
+
+  @override
+  ClcThemeColors lerp(ThemeExtension<ClcThemeColors>? other, double t) {
+    if (other is! ClcThemeColors) return this;
+    return ClcThemeColors(
+      isLight: t < 0.5 ? isLight : other.isLight,
+      bg: Color.lerp(bg, other.bg, t)!,
+      shell: Color.lerp(shell, other.shell, t)!,
+      surface: Color.lerp(surface, other.surface, t)!,
+      surfaceSoft: Color.lerp(surfaceSoft, other.surfaceSoft, t)!,
+      surfaceRaised: Color.lerp(surfaceRaised, other.surfaceRaised, t)!,
+      field: Color.lerp(field, other.field, t)!,
+      text: Color.lerp(text, other.text, t)!,
+      textStrong: Color.lerp(textStrong, other.textStrong, t)!,
+      muted: Color.lerp(muted, other.muted, t)!,
+      mutedStrong: Color.lerp(mutedStrong, other.mutedStrong, t)!,
+      border: Color.lerp(border, other.border, t)!,
+      borderStrong: Color.lerp(borderStrong, other.borderStrong, t)!,
+      focus: Color.lerp(focus, other.focus, t)!,
+      onFocus: Color.lerp(onFocus, other.onFocus, t)!,
+      action: Color.lerp(action, other.action, t)!,
+      onAction: Color.lerp(onAction, other.onAction, t)!,
+      danger: Color.lerp(danger, other.danger, t)!,
+    );
+  }
+}
+
 class AppColors {
   const AppColors._();
 
@@ -86,55 +244,56 @@ class AppTheme {
   const AppTheme._();
 
   static ThemeData light() {
+    return _build(ClcThemeColors.light, Brightness.light);
+  }
+
+  static ThemeData dark() {
+    return _build(ClcThemeColors.dark, Brightness.dark);
+  }
+
+  static ThemeData _build(ClcThemeColors colors, Brightness brightness) {
     final base = ThemeData(
       useMaterial3: true,
       fontFamily: 'Inter',
       colorScheme: ColorScheme.fromSeed(
-        seedColor: AppColors.accent,
-        brightness: Brightness.dark,
-        surface: AppColors.surface,
+        seedColor: colors.focus,
+        brightness: brightness,
+        surface: colors.surface,
       ),
     );
 
     return base.copyWith(
-      scaffoldBackgroundColor: AppColors.ink,
+      extensions: <ThemeExtension<dynamic>>[colors],
+      scaffoldBackgroundColor: colors.bg,
       textTheme: base.textTheme.apply(
-        bodyColor: AppColors.text,
-        displayColor: AppColors.text,
+        bodyColor: colors.text,
+        displayColor: colors.text,
         fontFamily: 'Inter',
       ),
-      iconTheme: const IconThemeData(color: AppColors.text, size: 22),
+      iconTheme: IconThemeData(color: colors.text, size: 22),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: AppColors.surfaceMuted,
+        fillColor: colors.field,
         border: OutlineInputBorder(
-          borderSide: BorderSide.none,
+          borderSide: BorderSide(color: colors.border),
           borderRadius: BorderRadius.circular(8),
         ),
         enabledBorder: OutlineInputBorder(
-          borderSide: BorderSide.none,
+          borderSide: BorderSide(color: colors.border),
           borderRadius: BorderRadius.circular(8),
         ),
         focusedBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: AppColors.accent, width: 1.4),
+          borderSide: BorderSide(color: colors.focus, width: 1.4),
           borderRadius: BorderRadius.circular(8),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 20,
           vertical: 18,
         ),
-        labelStyle: AppTextStyles.eyebrow.copyWith(letterSpacing: 2),
-      ),
-    );
-  }
-
-  static ThemeData dark() {
-    final base = light();
-    return base.copyWith(
-      scaffoldBackgroundColor: const Color(0xFF07080B),
-      colorScheme: base.colorScheme.copyWith(
-        brightness: Brightness.dark,
-        surface: const Color(0xFF17181C),
+        labelStyle: AppTextStyles.eyebrow.copyWith(
+          color: colors.muted,
+          letterSpacing: 2,
+        ),
       ),
     );
   }

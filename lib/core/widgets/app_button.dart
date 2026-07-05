@@ -21,16 +21,17 @@ class AppButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
     final isPrimary = tone == AppButtonTone.primary;
     final background = isPrimary
-        ? AppColors.accent
+        ? colors.focus
         : tone == AppButtonTone.secondary
-        ? AppColors.surfaceMuted
+        ? colors.field
         : Colors.transparent;
-    final foreground = isPrimary ? AppColors.ink : AppColors.text;
+    final foreground = isPrimary ? colors.onFocus : colors.text;
     final borderColor = tone == AppButtonTone.ghost
         ? Colors.transparent
-        : AppColors.border;
+        : colors.border;
 
     final child = ConstrainedBox(
       constraints: const BoxConstraints(minHeight: 52, minWidth: 52),
@@ -38,11 +39,11 @@ class AppButton extends StatelessWidget {
         style: FilledButton.styleFrom(
           backgroundColor: background,
           foregroundColor: foreground,
-          disabledBackgroundColor: AppColors.surfaceMuted,
-          disabledForegroundColor: AppColors.muted,
+          disabledBackgroundColor: colors.surfaceSoft,
+          disabledForegroundColor: colors.muted,
           elevation: isPrimary ? 10 : 0,
           shadowColor: isPrimary
-              ? AppColors.accent.withValues(alpha: 0.22)
+              ? colors.focus.withValues(alpha: colors.isLight ? 0.14 : 0.22)
               : Colors.transparent,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),

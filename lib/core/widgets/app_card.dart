@@ -6,8 +6,8 @@ class AppCard extends StatelessWidget {
     required this.child,
     this.padding = const EdgeInsets.all(24),
     this.margin,
-    this.color = AppColors.surface,
-    this.borderColor = AppColors.border,
+    this.color,
+    this.borderColor,
     this.onTap,
     super.key,
   });
@@ -15,20 +15,21 @@ class AppCard extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry padding;
   final EdgeInsetsGeometry? margin;
-  final Color color;
-  final Color borderColor;
+  final Color? color;
+  final Color? borderColor;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
     final card = Container(
       margin: margin,
       padding: padding,
       decoration: BoxDecoration(
-        color: color,
+        color: color ?? colors.field,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: borderColor),
-        boxShadow: AppShadows.soft,
+        border: Border.all(color: borderColor ?? colors.border),
+        boxShadow: colors.isLight ? AppShadows.soft : const [],
       ),
       child: child,
     );

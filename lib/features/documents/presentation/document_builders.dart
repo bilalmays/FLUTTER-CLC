@@ -607,11 +607,11 @@ class _PickupDocumentBuilderState extends ConsumerState<PickupDocumentBuilder> {
   final _notesController = TextEditingController();
   final _clientSignatureController = SignatureController(
     penStrokeWidth: 2.6,
-    penColor: AppColors.text,
+    penColor: Colors.black,
   );
   final _companySignatureController = SignatureController(
     penStrokeWidth: 2.4,
-    penColor: AppColors.text,
+    penColor: Colors.black,
   );
   String _condition = 'Moyen';
   bool _companySignatureRequired = false;
@@ -784,6 +784,7 @@ class DocumentsHistoryBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
     final rows = [
       ('Devis', 'Génération PDF Flutter active', "Aujourd'hui"),
       ('Carnet', 'Client + véhicule + service', "Aujourd'hui"),
@@ -805,8 +806,8 @@ class DocumentsHistoryBuilder extends StatelessWidget {
           const SizedBox(height: 22),
           Container(
             decoration: BoxDecoration(
-              border: Border.all(color: AppColors.border),
-              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: colors.border),
+              borderRadius: BorderRadius.circular(8),
             ),
             child: Column(
               children: [
@@ -816,22 +817,32 @@ class DocumentsHistoryBuilder extends StatelessWidget {
                     decoration: BoxDecoration(
                       border: i == 0
                           ? null
-                          : const Border(
-                              top: BorderSide(color: AppColors.border),
-                            ),
+                          : Border(top: BorderSide(color: colors.border)),
                     ),
                     child: Row(
                       children: [
                         Expanded(
                           child: Text(
                             rows[i].$1,
-                            style: AppTextStyles.cardTitle,
+                            style: AppTextStyles.cardTitle.copyWith(
+                              color: colors.textStrong,
+                            ),
                           ),
                         ),
                         Expanded(
-                          child: Text(rows[i].$2, style: AppTextStyles.body),
+                          child: Text(
+                            rows[i].$2,
+                            style: AppTextStyles.body.copyWith(
+                              color: colors.muted,
+                            ),
+                          ),
                         ),
-                        Text(rows[i].$3, style: AppTextStyles.body),
+                        Text(
+                          rows[i].$3,
+                          style: AppTextStyles.body.copyWith(
+                            color: colors.muted,
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -857,7 +868,7 @@ class _EtatDocumentBuilderState extends ConsumerState<EtatDocumentBuilder> {
   final _notesController = TextEditingController();
   final _signatureController = SignatureController(
     penStrokeWidth: 2.6,
-    penColor: AppColors.text,
+    penColor: Colors.black,
   );
   final Map<String, bool> _checklist = {
     'Carrosserie contrôlée': true,
@@ -1029,17 +1040,22 @@ class _InspectionChecklist extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: AppColors.surfaceMuted,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.border),
+        color: colors.field,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: colors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Checklist'.toUpperCase(), style: AppTextStyles.eyebrow),
+          Text(
+            'Checklist'.toUpperCase(),
+            style: AppTextStyles.eyebrow.copyWith(color: colors.muted),
+          ),
           const SizedBox(height: 12),
           for (final entry in values.entries)
             CheckboxListTile(
@@ -1047,9 +1063,13 @@ class _InspectionChecklist extends StatelessWidget {
               onChanged: (value) => onChanged(entry.key, value ?? false),
               title: Text(
                 entry.key,
-                style: const TextStyle(fontWeight: FontWeight.w800),
+                style: TextStyle(
+                  color: colors.textStrong,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
-              activeColor: AppColors.navy,
+              activeColor: colors.focus,
+              checkColor: colors.onFocus,
               contentPadding: EdgeInsets.zero,
             ),
         ],
@@ -1073,12 +1093,14 @@ class _PhotoSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: AppColors.surfaceMuted,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.border),
+        color: colors.field,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: colors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1088,7 +1110,7 @@ class _PhotoSection extends StatelessWidget {
               Expanded(
                 child: Text(
                   'Photos'.toUpperCase(),
-                  style: AppTextStyles.eyebrow,
+                  style: AppTextStyles.eyebrow.copyWith(color: colors.muted),
                 ),
               ),
               AppButton(
@@ -1140,12 +1162,14 @@ class _SignatureSection extends StatefulWidget {
 class _SignatureSectionState extends State<_SignatureSection> {
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: AppColors.surfaceMuted,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.border),
+        color: colors.field,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: colors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1155,7 +1179,7 @@ class _SignatureSectionState extends State<_SignatureSection> {
               Expanded(
                 child: Text(
                   'Signature client obligatoire'.toUpperCase(),
-                  style: AppTextStyles.eyebrow,
+                  style: AppTextStyles.eyebrow.copyWith(color: colors.muted),
                 ),
               ),
               TextButton(
@@ -1173,7 +1197,7 @@ class _SignatureSectionState extends State<_SignatureSection> {
             child: Signature(
               controller: widget.controller,
               height: 180,
-              backgroundColor: AppColors.surfaceMuted,
+              backgroundColor: Colors.white,
             ),
           ),
         ],
@@ -1249,6 +1273,8 @@ class _StepperBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return LayoutBuilder(
       builder: (context, constraints) {
         final mobile = constraints.maxWidth < 760;
@@ -1269,14 +1295,10 @@ class _StepperBar extends StatelessWidget {
                   vertical: 14,
                 ),
                 decoration: BoxDecoration(
-                  color: index + 1 == step
-                      ? AppColors.navy
-                      : AppColors.surfaceMuted,
-                  borderRadius: BorderRadius.circular(20),
+                  color: index + 1 == step ? colors.focus : colors.field,
+                  borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: index + 1 == step
-                        ? AppColors.navy
-                        : AppColors.border,
+                    color: index + 1 == step ? colors.focus : colors.border,
                   ),
                   boxShadow: index + 1 == step ? AppShadows.soft : null,
                 ),
@@ -1286,15 +1308,19 @@ class _StepperBar extends StatelessWidget {
                       width: 34,
                       height: 34,
                       decoration: BoxDecoration(
-                        color: index + 1 == step ? Colors.white : Colors.white,
-                        borderRadius: BorderRadius.circular(12),
+                        color: index + 1 == step
+                            ? colors.onFocus
+                            : colors.surfaceRaised,
+                        borderRadius: BorderRadius.circular(8),
                       ),
                       alignment: Alignment.center,
                       child: Text(
                         '${index + 1}',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.w900,
-                          color: AppColors.text,
+                          color: index + 1 == step
+                              ? colors.focus
+                              : colors.mutedStrong,
                         ),
                       ),
                     ),
@@ -1304,8 +1330,8 @@ class _StepperBar extends StatelessWidget {
                         steps[index].toUpperCase(),
                         style: TextStyle(
                           color: index + 1 == step
-                              ? Colors.white
-                              : AppColors.text,
+                              ? colors.onFocus
+                              : colors.textStrong,
                           fontWeight: FontWeight.w900,
                           letterSpacing: 1.2,
                           fontSize: 12,
@@ -1335,14 +1361,25 @@ class _MiniTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(eyebrow.toUpperCase(), style: AppTextStyles.eyebrow),
+        Text(
+          eyebrow.toUpperCase(),
+          style: AppTextStyles.eyebrow.copyWith(color: colors.focus),
+        ),
         const SizedBox(height: 10),
-        Text(title, style: AppTextStyles.pageTitle.copyWith(fontSize: 38)),
+        Text(
+          title,
+          style: AppTextStyles.pageTitle.copyWith(
+            color: colors.textStrong,
+            fontSize: 38,
+          ),
+        ),
         const SizedBox(height: 10),
-        Text(subtitle, style: AppTextStyles.body),
+        Text(subtitle, style: AppTextStyles.body.copyWith(color: colors.muted)),
       ],
     );
   }
@@ -1439,6 +1476,8 @@ class _ServicesStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1451,13 +1490,18 @@ class _ServicesStep extends StatelessWidget {
                 label: Text(category.label.toUpperCase()),
                 selected: category.id == categoryId,
                 onSelected: (_) => onCategoryChanged(category.id),
-                selectedColor: AppColors.navy,
-                backgroundColor: AppColors.surfaceMuted,
+                selectedColor: colors.focus,
+                backgroundColor: colors.field,
+                side: BorderSide(
+                  color: category.id == categoryId
+                      ? colors.focus
+                      : colors.border,
+                ),
                 showCheckmark: false,
                 labelStyle: TextStyle(
                   color: category.id == categoryId
-                      ? Colors.white
-                      : AppColors.text,
+                      ? colors.onFocus
+                      : colors.textStrong,
                   fontSize: 11,
                   fontWeight: FontWeight.w900,
                   letterSpacing: 1.3,
@@ -1493,15 +1537,18 @@ class _ServiceQuantityRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+    final isSelected = quantity > 0;
+
     return Container(
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: quantity > 0 ? const Color(0xFFF0F2F5) : AppColors.surfaceMuted,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: quantity > 0 ? AppColors.navy : AppColors.border,
-        ),
+        color: isSelected
+            ? colors.focus.withValues(alpha: colors.isLight ? 0.07 : 0.10)
+            : colors.field,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: isSelected ? colors.focus : colors.border),
       ),
       child: Row(
         children: [
@@ -1509,9 +1556,17 @@ class _ServiceQuantityRow extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(service.label, style: AppTextStyles.cardTitle),
+                Text(
+                  service.label,
+                  style: AppTextStyles.cardTitle.copyWith(
+                    color: colors.textStrong,
+                  ),
+                ),
                 const SizedBox(height: 6),
-                Text(formatMoney(price), style: AppTextStyles.body),
+                Text(
+                  formatMoney(price),
+                  style: AppTextStyles.body.copyWith(color: colors.muted),
+                ),
               ],
             ),
           ),
@@ -1521,7 +1576,11 @@ class _ServiceQuantityRow extends StatelessWidget {
           ),
           Text(
             '$quantity',
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w900),
+            style: TextStyle(
+              color: colors.textStrong,
+              fontSize: 18,
+              fontWeight: FontWeight.w900,
+            ),
           ),
           IconButton(
             onPressed: () => onChanged(quantity + 1),
@@ -1627,6 +1686,8 @@ class _CarnetServiceStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1634,9 +1695,9 @@ class _CarnetServiceStep extends StatelessWidget {
           width: double.infinity,
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
-            color: AppColors.surfaceMuted,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: AppColors.border),
+            color: colors.field,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: colors.border),
           ),
           child: Column(
             children: [
@@ -1730,6 +1791,7 @@ class _CarnetVisitList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
     final effectiveEntries = entries.isEmpty
         ? [
             _CarnetVisitDraft(
@@ -1745,19 +1807,22 @@ class _CarnetVisitList extends StatelessWidget {
       width: double.infinity,
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: colors.field,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: colors.border),
       ),
       child: Column(
         children: [
           Container(
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-            color: AppColors.surfaceMuted,
+            color: colors.surfaceSoft,
             child: Text(
               'Historique des visites'.toUpperCase(),
-              style: AppTextStyles.eyebrow.copyWith(letterSpacing: 2.4),
+              style: AppTextStyles.eyebrow.copyWith(
+                color: colors.muted,
+                letterSpacing: 2.4,
+              ),
             ),
           ),
           for (var index = 0; index < effectiveEntries.length; index += 1) ...[
@@ -1790,6 +1855,8 @@ class _CarnetVisitRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
       child: Row(
@@ -1799,13 +1866,13 @@ class _CarnetVisitRow extends StatelessWidget {
             height: 48,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: draft ? AppColors.surfaceMuted : AppColors.navy,
-              borderRadius: BorderRadius.circular(12),
+              color: draft ? colors.surfaceSoft : colors.focus,
+              borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
               (index + 1).toString().padLeft(2, '0'),
               style: TextStyle(
-                color: draft ? AppColors.muted : Colors.white,
+                color: draft ? colors.muted : colors.onFocus,
                 fontWeight: FontWeight.w900,
               ),
             ),
@@ -1817,8 +1884,8 @@ class _CarnetVisitRow extends StatelessWidget {
               children: [
                 Text(
                   entry.pack.toUpperCase(),
-                  style: const TextStyle(
-                    color: AppColors.text,
+                  style: TextStyle(
+                    color: colors.textStrong,
                     fontWeight: FontWeight.w900,
                     fontSize: 14,
                   ),
@@ -1826,8 +1893,8 @@ class _CarnetVisitRow extends StatelessWidget {
                 const SizedBox(height: 5),
                 Text(
                   '${entry.category} - ${formatDate(entry.date)}',
-                  style: const TextStyle(
-                    color: AppColors.muted,
+                  style: TextStyle(
+                    color: colors.muted,
                     fontWeight: FontWeight.w700,
                     fontSize: 12,
                   ),
@@ -1838,8 +1905,8 @@ class _CarnetVisitRow extends StatelessWidget {
                     entry.remark,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
-                      color: Color(0xFF3F3F46),
+                    style: TextStyle(
+                      color: colors.mutedStrong,
                       fontSize: 12,
                       fontWeight: FontWeight.w600,
                     ),
@@ -1865,16 +1932,18 @@ class _SoftDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return Container(
       height: 1,
       width: double.infinity,
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Color(0x00E5E7EB),
-            Color(0xFFE5E7EB),
-            Color(0xFFE5E7EB),
-            Color(0x00E5E7EB),
+            colors.border.withValues(alpha: 0),
+            colors.border,
+            colors.border,
+            colors.border.withValues(alpha: 0),
           ],
           stops: [0, 0.10, 0.90, 1],
         ),
@@ -1953,13 +2022,15 @@ class _DocumentActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: AppColors.surfaceMuted,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: AppColors.border),
+        color: colors.field,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: colors.border),
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -1985,10 +2056,16 @@ class _DocumentActions extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: AppTextStyles.cardTitle.copyWith(fontSize: 24),
+                style: AppTextStyles.cardTitle.copyWith(
+                  color: colors.textStrong,
+                  fontSize: 24,
+                ),
               ),
               const SizedBox(height: 6),
-              Text(description, style: AppTextStyles.body),
+              Text(
+                description,
+                style: AppTextStyles.body.copyWith(color: colors.muted),
+              ),
               const SizedBox(height: 18),
               mobile
                   ? Column(
@@ -2059,38 +2136,40 @@ class _ChoiceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(24),
+        borderRadius: BorderRadius.circular(8),
         onTap: onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: selected ? AppColors.navy : AppColors.surfaceMuted,
-            borderRadius: BorderRadius.circular(24),
-            border: Border.all(
-              color: selected ? AppColors.navy : AppColors.border,
-            ),
+            color: selected ? colors.focus : colors.field,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: selected ? colors.focus : colors.border),
             boxShadow: selected ? AppShadows.soft : null,
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(icon, color: selected ? Colors.white : AppColors.navy),
+              Icon(icon, color: selected ? colors.onFocus : colors.focus),
               const SizedBox(height: 22),
               Text(
                 title,
                 style: AppTextStyles.cardTitle.copyWith(
-                  color: selected ? Colors.white : AppColors.text,
+                  color: selected ? colors.onFocus : colors.textStrong,
                 ),
               ),
               const SizedBox(height: 8),
               Text(
                 subtitle,
                 style: AppTextStyles.body.copyWith(
-                  color: selected ? Colors.white70 : AppColors.muted,
+                  color: selected
+                      ? colors.onFocus.withValues(alpha: 0.72)
+                      : colors.muted,
                 ),
               ),
             ],
@@ -2114,11 +2193,17 @@ class _SwitchRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return SwitchListTile(
       value: value,
       onChanged: onChanged,
-      title: Text(label, style: const TextStyle(fontWeight: FontWeight.w800)),
-      activeThumbColor: AppColors.navy,
+      title: Text(
+        label,
+        style: TextStyle(color: colors.textStrong, fontWeight: FontWeight.w800),
+      ),
+      activeThumbColor: colors.focus,
+      activeTrackColor: colors.focus.withValues(alpha: 0.32),
       contentPadding: EdgeInsets.zero,
     );
   }
@@ -2141,13 +2226,15 @@ class _TextInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return TextField(
       controller: controller,
       keyboardType: keyboardType,
       maxLines: maxLines,
       onChanged: onChanged,
       decoration: InputDecoration(labelText: label.toUpperCase()),
-      style: const TextStyle(fontWeight: FontWeight.w800),
+      style: TextStyle(color: colors.textStrong, fontWeight: FontWeight.w800),
     );
   }
 }
@@ -2165,8 +2252,10 @@ class _DateField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return InkWell(
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(8),
       onTap: () async {
         final picked = await showDatePicker(
           context: context,
@@ -2183,7 +2272,10 @@ class _DateField extends StatelessWidget {
             Expanded(
               child: Text(
                 formatDate(value),
-                style: const TextStyle(fontWeight: FontWeight.w800),
+                style: TextStyle(
+                  color: colors.textStrong,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
             ),
             const Icon(Icons.calendar_today_outlined),
@@ -2202,25 +2294,33 @@ class _DistancePanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: AppColors.surfaceMuted,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: AppColors.border),
+        color: colors.field,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: colors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Distance retenue'.toUpperCase(), style: AppTextStyles.eyebrow),
+          Text(
+            'Distance retenue'.toUpperCase(),
+            style: AppTextStyles.eyebrow.copyWith(color: colors.muted),
+          ),
           const SizedBox(height: 8),
           Text(
             '${result.distanceKm.toStringAsFixed(2)} km - ${formatMoney(price)}',
-            style: AppTextStyles.cardTitle,
+            style: AppTextStyles.cardTitle.copyWith(color: colors.textStrong),
           ),
           const SizedBox(height: 6),
-          Text(result.note, style: AppTextStyles.body),
+          Text(
+            result.note,
+            style: AppTextStyles.body.copyWith(color: colors.muted),
+          ),
         ],
       ),
     );
@@ -2232,10 +2332,12 @@ class _LoadingBlock extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(
+    final colors = ClcThemeColors.of(context);
+
+    return Center(
       child: Padding(
-        padding: EdgeInsets.all(32),
-        child: CircularProgressIndicator(color: AppColors.navy),
+        padding: const EdgeInsets.all(32),
+        child: CircularProgressIndicator(color: colors.focus),
       ),
     );
   }

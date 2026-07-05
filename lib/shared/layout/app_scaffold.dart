@@ -1,4 +1,5 @@
 import 'package:car_luxe_cleaning_flutter/app/theme.dart';
+import 'package:car_luxe_cleaning_flutter/app/theme_scope.dart';
 import 'package:car_luxe_cleaning_flutter/shared/layout/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -58,9 +59,10 @@ class AppScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isMobile = Responsive.isMobile(context);
+    final colors = ClcThemeColors.of(context);
 
     return Scaffold(
-      backgroundColor: AppColors.ink,
+      backgroundColor: colors.bg,
       body: SafeArea(
         maintainBottomViewPadding: true,
         child: Row(
@@ -69,8 +71,9 @@ class AppScaffold extends StatelessWidget {
             Expanded(
               child: Padding(
                 padding: EdgeInsets.zero,
-                child: Container(
-                  decoration: const BoxDecoration(color: Color(0xFF050505)),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
+                  decoration: BoxDecoration(color: colors.bg),
                   child: Padding(
                     padding: EdgeInsets.all(Responsive.pagePadding(context)),
                     child: child,
@@ -101,6 +104,7 @@ class _SideNavigationState extends State<_SideNavigation> {
   int _secretTapCount = 0;
 
   void _handleThemeTap() {
+    AppThemeScope.of(context).toggleTheme();
     _secretTapCount += 1;
     if (_secretTapCount >= 7) {
       _secretTapCount = 0;
@@ -110,12 +114,15 @@ class _SideNavigationState extends State<_SideNavigation> {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    final colors = ClcThemeColors.of(context);
+    final themeScope = AppThemeScope.of(context);
+    return AnimatedContainer(
+      duration: const Duration(milliseconds: 180),
       width: 100,
       margin: const EdgeInsets.all(0),
       decoration: BoxDecoration(
-        color: AppColors.ink,
-        border: const Border(right: BorderSide(color: Color(0x1AFFFFFF))),
+        color: colors.shell,
+        border: Border(right: BorderSide(color: colors.border)),
       ),
       child: Column(
         children: [
@@ -146,21 +153,23 @@ class _SideNavigationState extends State<_SideNavigation> {
               ),
             ),
           ),
-          const SizedBox(
+          SizedBox(
             width: 8,
             height: 8,
             child: DecoratedBox(
               decoration: BoxDecoration(
-                color: AppColors.accent,
+                color: colors.focus,
                 shape: BoxShape.circle,
-                boxShadow: [BoxShadow(color: AppColors.accent, blurRadius: 8)],
+                boxShadow: [BoxShadow(color: colors.focus, blurRadius: 8)],
               ),
             ),
           ),
           const SizedBox(height: 26),
           _SidebarActionButton(
-            icon: Icons.dark_mode_outlined,
-            label: 'Mode sombre',
+            icon: themeScope.isLight
+                ? Icons.dark_mode_outlined
+                : Icons.light_mode_outlined,
+            label: themeScope.isLight ? 'Mode sombre' : 'Mode clair',
             onTap: _handleThemeTap,
           ),
           const SizedBox(height: 22),
@@ -190,6 +199,7 @@ class _BottomNavigationState extends State<_BottomNavigation> {
   int _secretTapCount = 0;
 
   void _handleThemeTap() {
+    AppThemeScope.of(context).toggleTheme();
     _secretTapCount += 1;
     if (_secretTapCount >= 7) {
       _secretTapCount = 0;
@@ -199,6 +209,8 @@ class _BottomNavigationState extends State<_BottomNavigation> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+    final themeScope = AppThemeScope.of(context);
     return SafeArea(
       top: false,
       minimum: const EdgeInsets.fromLTRB(14, 0, 14, 14),
@@ -206,12 +218,14 @@ class _BottomNavigationState extends State<_BottomNavigation> {
         height: 68,
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
-          color: const Color(0xF2090909),
+          color: colors.shell.withValues(alpha: colors.isLight ? 0.96 : 0.95),
           borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: const Color(0x1AFFFFFF)),
-          boxShadow: const [
+          border: Border.all(color: colors.border),
+          boxShadow: [
             BoxShadow(
-              color: Color(0x66000000),
+              color: Colors.black.withValues(
+                alpha: colors.isLight ? 0.14 : 0.40,
+              ),
               blurRadius: 28,
               offset: Offset(0, 16),
             ),
@@ -228,8 +242,10 @@ class _BottomNavigationState extends State<_BottomNavigation> {
               ),
             Expanded(
               child: _MobileActionButton(
-                icon: Icons.dark_mode_outlined,
-                label: 'Mode sombre',
+                icon: themeScope.isLight
+                    ? Icons.dark_mode_outlined
+                    : Icons.light_mode_outlined,
+                label: themeScope.isLight ? 'Mode sombre' : 'Mode clair',
                 onTap: _handleThemeTap,
               ),
             ),
@@ -253,6 +269,7 @@ class _MobileActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
     return Tooltip(
       message: label,
       child: InkWell(
@@ -260,11 +277,7 @@ class _MobileActionButton extends StatelessWidget {
         onTap: onTap,
         child: SizedBox(
           height: 52,
-          child: Icon(
-            icon,
-            color: Colors.white.withValues(alpha: 0.45),
-            size: 22,
-          ),
+          child: Icon(icon, color: colors.muted, size: 22),
         ),
       ),
     );
@@ -279,6 +292,7 @@ class _SidebarNavButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
     return Tooltip(
       message: item.label,
       child: InkWell(
@@ -292,18 +306,18 @@ class _SidebarNavButton extends StatelessWidget {
               Icon(
                 item.icon,
                 color: active
-                    ? Colors.white
-                    : Colors.white.withValues(alpha: 0.45),
+                    ? colors.textStrong
+                    : colors.muted.withValues(alpha: 0.82),
                 size: 24,
               ),
               if (active)
-                const Positioned(
+                Positioned(
                   left: 0,
                   child: SizedBox(
                     width: 4,
                     height: 32,
                     child: DecoratedBox(
-                      decoration: BoxDecoration(color: AppColors.accent),
+                      decoration: BoxDecoration(color: colors.focus),
                     ),
                   ),
                 ),
@@ -320,11 +334,12 @@ class _SidebarDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
     return Container(
       width: 20,
       height: 1,
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.10),
+        color: colors.border,
         borderRadius: BorderRadius.circular(999),
       ),
     );
@@ -346,6 +361,7 @@ class _SidebarActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
     return Tooltip(
       message: label,
       child: InkWell(
@@ -356,9 +372,7 @@ class _SidebarActionButton extends StatelessWidget {
           height: 44,
           child: Icon(
             icon,
-            color: active
-                ? AppColors.accent
-                : Colors.white.withValues(alpha: 0.40),
+            color: active ? colors.focus : colors.muted,
             size: 22,
           ),
         ),
@@ -375,6 +389,7 @@ class _MobileNavButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
     return Tooltip(
       message: item.label,
       child: InkWell(
@@ -383,7 +398,7 @@ class _MobileNavButton extends StatelessWidget {
         child: Container(
           height: 52,
           decoration: BoxDecoration(
-            color: active ? AppColors.accent : Colors.transparent,
+            color: active ? colors.focus : Colors.transparent,
             borderRadius: BorderRadius.circular(16),
           ),
           child: Stack(
@@ -391,20 +406,18 @@ class _MobileNavButton extends StatelessWidget {
             children: [
               Icon(
                 item.icon,
-                color: active
-                    ? Colors.black
-                    : Colors.white.withValues(alpha: 0.45),
+                color: active ? colors.onFocus : colors.muted,
                 size: 22,
               ),
               if (active)
-                const Positioned(
+                Positioned(
                   bottom: 6,
                   child: SizedBox(
                     width: 4,
                     height: 4,
                     child: DecoratedBox(
                       decoration: BoxDecoration(
-                        color: Colors.black54,
+                        color: colors.onFocus.withValues(alpha: 0.70),
                         shape: BoxShape.circle,
                       ),
                     ),

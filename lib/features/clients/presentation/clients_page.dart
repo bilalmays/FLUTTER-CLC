@@ -205,6 +205,7 @@ class _ClientsPageState extends ConsumerState<ClientsPage> {
   @override
   Widget build(BuildContext context) {
     final isMobile = Responsive.isMobile(context);
+    final colors = ClcThemeColors.of(context);
 
     return SingleChildScrollView(
       child: Column(
@@ -243,9 +244,9 @@ class _ClientsPageState extends ConsumerState<ClientsPage> {
                 ),
                 const SizedBox(height: 22),
                 if (_loading)
-                  const Padding(
-                    padding: EdgeInsets.all(30),
-                    child: CircularProgressIndicator(color: AppColors.navy),
+                  Padding(
+                    padding: const EdgeInsets.all(30),
+                    child: CircularProgressIndicator(color: colors.focus),
                   )
                 else if (_error != null)
                   _ErrorState(message: _error!)
@@ -408,15 +409,17 @@ class _SearchField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return TextField(
       controller: controller,
       onChanged: (_) => onChanged(),
       decoration: InputDecoration(
         labelText: label.toUpperCase(),
         hintText: hint,
-        prefixIcon: Icon(icon, color: AppColors.muted),
+        prefixIcon: Icon(icon, color: colors.muted),
       ),
-      style: const TextStyle(fontWeight: FontWeight.w700),
+      style: TextStyle(color: colors.textStrong, fontWeight: FontWeight.w700),
     );
   }
 }
@@ -434,21 +437,23 @@ class _FilterChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return ChoiceChip(
       label: Text(label.toUpperCase()),
       selected: selected,
       onSelected: (_) => onTap(),
-      selectedColor: AppColors.navy,
+      selectedColor: colors.focus,
       backgroundColor: Colors.transparent,
       showCheckmark: false,
       labelStyle: TextStyle(
-        color: selected ? Colors.white : AppColors.muted,
+        color: selected ? colors.onFocus : colors.muted,
         fontSize: 11,
         fontWeight: FontWeight.w900,
         letterSpacing: 1.5,
       ),
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      side: BorderSide(color: selected ? AppColors.navy : AppColors.border),
+      side: BorderSide(color: selected ? colors.focus : colors.border),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
     );
   }
@@ -474,29 +479,37 @@ class _ClientTable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     if (bundles.isEmpty) {
       return Container(
         width: double.infinity,
         padding: const EdgeInsets.all(30),
         decoration: BoxDecoration(
-          color: AppColors.surfaceMuted,
-          borderRadius: BorderRadius.circular(24),
+          color: colors.field,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: colors.border),
         ),
-        child: Text('Aucun client trouve.', style: AppTextStyles.body),
+        child: Text(
+          'Aucun client trouve.',
+          style: AppTextStyles.body.copyWith(color: colors.muted),
+        ),
       );
     }
 
     return Container(
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.border),
-        boxShadow: const [
+        color: colors.surfaceRaised,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: colors.border),
+        boxShadow: [
           BoxShadow(
-            color: Color(0x0A0F172A),
+            color: colors.textStrong.withValues(
+              alpha: colors.isLight ? 0.04 : 0.12,
+            ),
             blurRadius: 24,
-            offset: Offset(0, 8),
+            offset: const Offset(0, 8),
           ),
         ],
       ),
@@ -525,11 +538,13 @@ class _TableHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-      decoration: const BoxDecoration(
-        color: Color(0xFFF9FAFB),
-        border: Border(bottom: BorderSide(color: AppColors.border)),
+      decoration: BoxDecoration(
+        color: colors.surfaceSoft,
+        border: Border(bottom: BorderSide(color: colors.border)),
       ),
       child: const Row(
         children: [
@@ -551,16 +566,18 @@ class _FadeDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return Container(
       height: 1,
       width: double.infinity,
-      decoration: const BoxDecoration(
+      decoration: BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Color(0x00E5E7EB),
-            Color(0xFFE5E7EB),
-            Color(0xFFE5E7EB),
-            Color(0x00E5E7EB),
+            colors.border.withValues(alpha: 0),
+            colors.border,
+            colors.border,
+            colors.border.withValues(alpha: 0),
           ],
           stops: [0, 0.10, 0.90, 1],
         ),
@@ -576,7 +593,12 @@ class _HeaderLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Text(label.toUpperCase(), style: AppTextStyles.eyebrow);
+    final colors = ClcThemeColors.of(context);
+
+    return Text(
+      label.toUpperCase(),
+      style: AppTextStyles.eyebrow.copyWith(color: colors.mutedStrong),
+    );
   }
 }
 
@@ -669,6 +691,7 @@ class _ClientIdentity extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
     final company =
         client.isProfessional && (client.companyName ?? '').isNotEmpty
         ? client.companyName!
@@ -680,18 +703,17 @@ class _ClientIdentity extends StatelessWidget {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: client.isProfessional
-                ? AppColors.navy
-                : AppColors.background,
+            color: client.isProfessional ? colors.focus : colors.surfaceSoft,
             shape: BoxShape.circle,
+            border: Border.all(color: colors.border),
           ),
           alignment: Alignment.center,
           child: Text(
             _initialsFor(client),
             style: TextStyle(
               color: client.isProfessional
-                  ? Colors.white
-                  : const Color(0xFF3F3F46),
+                  ? colors.onFocus
+                  : colors.mutedStrong,
               fontWeight: FontWeight.w900,
               fontSize: 12,
             ),
@@ -710,15 +732,15 @@ class _ClientIdentity extends StatelessWidget {
                         : Icons.person_outline_rounded,
                     color: client.isProfessional
                         ? AppColors.gold
-                        : AppColors.muted,
+                        : colors.muted,
                     size: 14,
                   ),
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
                       client.name,
-                      style: const TextStyle(
-                        color: AppColors.text,
+                      style: TextStyle(
+                        color: colors.textStrong,
                         fontWeight: FontWeight.w700,
                         fontSize: 15,
                       ),
@@ -734,7 +756,10 @@ class _ClientIdentity extends StatelessWidget {
                             ? 'Professionnel'
                             : 'Particulier'))
                     .toUpperCase(),
-                style: AppTextStyles.eyebrow.copyWith(letterSpacing: 2.5),
+                style: AppTextStyles.eyebrow.copyWith(
+                  color: colors.muted,
+                  letterSpacing: 2.5,
+                ),
                 overflow: TextOverflow.ellipsis,
               ),
               if ((client.vatNumber ?? '').isNotEmpty) ...[
@@ -813,15 +838,17 @@ class _RowActionsState extends State<_RowActions> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return MouseRegion(
       onEnter: (_) => setState(() => _hovering = true),
       onExit: (_) => setState(() => _hovering = false),
       child: PopupMenuButton<String>(
         tooltip: 'Actions client',
-        color: Colors.white,
+        color: colors.surfaceRaised,
         elevation: 12,
         offset: const Offset(0, 44),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         onSelected: _select,
         itemBuilder: (context) => const [
           PopupMenuItem(
@@ -846,21 +873,24 @@ class _RowActionsState extends State<_RowActions> {
           height: 40,
           transform: Matrix4.translationValues(0, _hovering ? -3 : 0, 0),
           decoration: BoxDecoration(
-            color: _hovering ? Colors.white : const Color(0xFFF3F4F6),
+            color: _hovering ? colors.surfaceRaised : colors.surfaceSoft,
             shape: BoxShape.circle,
+            border: Border.all(color: colors.border),
             boxShadow: [
               BoxShadow(
-                color: const Color(
-                  0xFF0F172A,
-                ).withValues(alpha: _hovering ? 0.14 : 0.08),
+                color: colors.textStrong.withValues(
+                  alpha: _hovering
+                      ? (colors.isLight ? 0.14 : 0.24)
+                      : (colors.isLight ? 0.08 : 0.12),
+                ),
                 blurRadius: _hovering ? 18 : 8,
                 offset: Offset(0, _hovering ? 8 : 2),
               ),
             ],
           ),
-          child: const Icon(
+          child: Icon(
             Icons.chevron_right_rounded,
-            color: AppColors.text,
+            color: colors.textStrong,
             size: 22,
           ),
         ),
@@ -877,14 +907,16 @@ class _MenuLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return Row(
       children: [
-        Icon(icon, size: 18, color: AppColors.text),
+        Icon(icon, size: 18, color: colors.textStrong),
         const SizedBox(width: 10),
         Text(
           label,
-          style: const TextStyle(
-            color: AppColors.text,
+          style: TextStyle(
+            color: colors.textStrong,
             fontWeight: FontWeight.w800,
           ),
         ),
@@ -911,6 +943,8 @@ class _MiniIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final danger = tone == _MiniIconTone.danger;
+    final colors = ClcThemeColors.of(context);
+
     return Tooltip(
       message: tooltip,
       child: InkWell(
@@ -921,23 +955,23 @@ class _MiniIconButton extends StatelessWidget {
           height: compact ? 24 : 38,
           decoration: BoxDecoration(
             color: compact
-                ? Colors.white.withValues(alpha: 0.72)
+                ? colors.surfaceRaised.withValues(alpha: 0.72)
                 : danger
-                ? const Color(0xFFFFF2F1)
-                : AppColors.surfaceMuted,
+                ? colors.danger.withValues(alpha: 0.08)
+                : colors.surfaceSoft,
             borderRadius: BorderRadius.circular(compact ? 999 : 14),
             border: compact
                 ? null
                 : Border.all(
                     color: danger
-                        ? AppColors.danger.withValues(alpha: 0.18)
-                        : AppColors.border,
+                        ? colors.danger.withValues(alpha: 0.18)
+                        : colors.border,
                   ),
           ),
           child: Icon(
             icon,
             size: compact ? 13 : 18,
-            color: danger ? AppColors.danger : AppColors.text,
+            color: danger ? colors.danger : colors.textStrong,
           ),
         ),
       ),
@@ -961,17 +995,19 @@ class _ContactLine extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final value = text.trim().isEmpty ? fallback : text.trim();
+    final colors = ClcThemeColors.of(context);
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
       child: Row(
         children: [
-          Icon(icon, size: 16, color: AppColors.muted),
+          Icon(icon, size: 16, color: colors.muted),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(
-                color: Color(0xFF3F3F46),
+              style: TextStyle(
+                color: colors.mutedStrong,
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
               ),
@@ -997,16 +1033,18 @@ class _VehicleLine extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     if (vehicles.isEmpty) {
       return Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: const Color(0xFFF9FAFB),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFFEEF2F7)),
+          color: colors.surfaceSoft,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: colors.border),
         ),
-        child: const Row(
+        child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
@@ -1032,9 +1070,9 @@ class _VehicleLine extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: const Color(0xFFF9FAFB),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFEEF2F7)),
+        color: colors.surfaceSoft,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: colors.border),
       ),
       child: Wrap(
         spacing: 8,
@@ -1044,16 +1082,17 @@ class _VehicleLine extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: AppColors.border,
+                color: colors.field,
                 borderRadius: BorderRadius.circular(999),
+                border: Border.all(color: colors.border),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.directions_car_outlined,
                     size: 12,
-                    color: AppColors.text,
+                    color: colors.textStrong,
                   ),
                   const SizedBox(width: 8),
                   ConstrainedBox(
@@ -1064,13 +1103,13 @@ class _VehicleLine extends StatelessWidget {
                         children: [
                           TextSpan(
                             text: ' ${vehicle.model}'.toUpperCase(),
-                            style: const TextStyle(color: Color(0xFF374151)),
+                            style: TextStyle(color: colors.mutedStrong),
                           ),
                         ],
                       ),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.w800,
-                        color: AppColors.text,
+                        color: colors.textStrong,
                         fontSize: 10,
                         letterSpacing: 0.4,
                       ),
@@ -1084,13 +1123,13 @@ class _VehicleLine extends StatelessWidget {
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: colors.surfaceRaised,
                       borderRadius: BorderRadius.circular(4),
-                      boxShadow: const [
+                      boxShadow: [
                         BoxShadow(
-                          color: Color(0x1A0F172A),
+                          color: colors.textStrong.withValues(alpha: 0.10),
                           blurRadius: 3,
-                          offset: Offset(0, 1),
+                          offset: const Offset(0, 1),
                         ),
                       ],
                     ),
@@ -1312,14 +1351,16 @@ class _ClientFormDialogState extends ConsumerState<_ClientFormDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return Dialog(
       insetPadding: const EdgeInsets.all(20),
       backgroundColor: Colors.transparent,
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 980),
         child: Material(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(30),
+          color: colors.surfaceRaised,
+          borderRadius: BorderRadius.circular(8),
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(30),
             child: Column(
@@ -1579,14 +1620,16 @@ class _VehicleFormDialogState extends ConsumerState<_VehicleFormDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return Dialog(
       insetPadding: const EdgeInsets.all(20),
       backgroundColor: Colors.transparent,
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 900),
         child: Material(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(30),
+          color: colors.surfaceRaised,
+          borderRadius: BorderRadius.circular(8),
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(30),
             child: Column(
@@ -1793,6 +1836,8 @@ class _VehicleSuggestFieldState extends ConsumerState<_VehicleSuggestField> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1810,9 +1855,9 @@ class _VehicleSuggestFieldState extends ConsumerState<_VehicleSuggestField> {
           Container(
             constraints: const BoxConstraints(maxHeight: 220),
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: AppColors.border),
+              color: colors.surfaceRaised,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: colors.border),
               boxShadow: AppShadows.soft,
             ),
             child: ListView.separated(
@@ -1820,20 +1865,23 @@ class _VehicleSuggestFieldState extends ConsumerState<_VehicleSuggestField> {
               padding: const EdgeInsets.symmetric(vertical: 6),
               itemCount: _suggestions.length,
               separatorBuilder: (_, _) =>
-                  const Divider(height: 1, color: AppColors.border),
+                  Divider(height: 1, color: colors.border),
               itemBuilder: (context, index) {
                 final suggestion = _suggestions[index];
                 return ListTile(
                   dense: true,
                   title: Text(
                     suggestion.label,
-                    style: const TextStyle(fontWeight: FontWeight.w900),
+                    style: TextStyle(
+                      color: colors.textStrong,
+                      fontWeight: FontWeight.w900,
+                    ),
                   ),
                   subtitle: suggestion.helper.isEmpty
                       ? null
                       : Text(
                           suggestion.helper,
-                          style: const TextStyle(color: AppColors.muted),
+                          style: TextStyle(color: colors.muted),
                         ),
                   onTap: () => _select(suggestion),
                 );
@@ -1871,6 +1919,8 @@ class _DialogHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1880,11 +1930,17 @@ class _DialogHeader extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: AppTextStyles.pageTitle.copyWith(fontSize: 38),
+                style: AppTextStyles.pageTitle.copyWith(
+                  color: colors.textStrong,
+                  fontSize: 38,
+                ),
               ),
               if ((subtitle ?? '').trim().isNotEmpty) ...[
                 const SizedBox(height: 8),
-                Text(subtitle!, style: AppTextStyles.body),
+                Text(
+                  subtitle!,
+                  style: AppTextStyles.body.copyWith(color: colors.muted),
+                ),
               ],
             ],
           ),
@@ -1949,22 +2005,24 @@ class _SegmentItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return InkWell(
-      borderRadius: BorderRadius.circular(20),
+      borderRadius: BorderRadius.circular(8),
       onTap: onTap,
       child: Container(
         height: 60,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: selected ? AppColors.navy : AppColors.surfaceMuted,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppColors.border),
+          color: selected ? colors.focus : colors.field,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: colors.border),
           boxShadow: selected ? AppShadows.soft : null,
         ),
         child: Text(
           label.toUpperCase(),
           style: TextStyle(
-            color: selected ? Colors.white : AppColors.text,
+            color: selected ? colors.onFocus : colors.textStrong,
             fontSize: 12,
             fontWeight: FontWeight.w900,
             letterSpacing: 2.4,
@@ -2026,6 +2084,8 @@ class _FormField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return TextField(
       controller: controller,
       maxLines: maxLines,
@@ -2034,29 +2094,29 @@ class _FormField extends StatelessWidget {
         labelText: label.toUpperCase(),
         hintText: hint,
         filled: true,
-        fillColor: AppColors.surfaceMuted,
+        fillColor: colors.field,
         prefixIcon: prefixIcon == null
             ? null
-            : Icon(prefixIcon, color: AppColors.muted),
+            : Icon(prefixIcon, color: colors.muted),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: 16,
           vertical: 12,
         ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: AppColors.border),
+          borderSide: BorderSide(color: colors.border),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: AppColors.border),
+          borderSide: BorderSide(color: colors.border),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: AppColors.accent, width: 1.2),
+          borderSide: BorderSide(color: colors.focus, width: 1.2),
         ),
       ),
-      style: const TextStyle(
-        color: AppColors.text,
+      style: TextStyle(
+        color: colors.textStrong,
         fontWeight: FontWeight.w800,
         fontSize: 16,
       ),
@@ -2072,33 +2132,37 @@ class _CompanyResults extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return Container(
       constraints: const BoxConstraints(maxHeight: 260),
       decoration: BoxDecoration(
-        color: AppColors.surfaceMuted,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: AppColors.border),
+        color: colors.field,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: colors.border),
       ),
       child: ListView.separated(
         shrinkWrap: true,
         padding: const EdgeInsets.symmetric(vertical: 8),
         itemCount: results.length,
-        separatorBuilder: (_, _) =>
-            const Divider(height: 1, color: AppColors.border),
+        separatorBuilder: (_, _) => Divider(height: 1, color: colors.border),
         itemBuilder: (context, index) {
           final company = results[index];
           return ListTile(
             title: Text(
               company.title,
-              style: const TextStyle(fontWeight: FontWeight.w900),
+              style: TextStyle(
+                color: colors.textStrong,
+                fontWeight: FontWeight.w900,
+              ),
             ),
             subtitle: Text(
               [
                 company.taxNumber,
                 company.address,
               ].where((value) => value.trim().isNotEmpty).join(' - '),
-              style: const TextStyle(
-                color: AppColors.muted,
+              style: TextStyle(
+                color: colors.muted,
                 fontWeight: FontWeight.w700,
               ),
             ),
@@ -2123,6 +2187,8 @@ class _LookupStatus extends StatelessWidget {
     final message = loading ? 'Recherche en cours...' : error ?? success;
     if (message == null || message.isEmpty) return const SizedBox.shrink();
     final isError = error != null;
+    final colors = ClcThemeColors.of(context);
+
     return Row(
       children: [
         if (loading)
@@ -2135,14 +2201,14 @@ class _LookupStatus extends StatelessWidget {
           Icon(
             isError ? Icons.warning_amber_rounded : Icons.check_circle_outline,
             size: 18,
-            color: isError ? AppColors.danger : AppColors.success,
+            color: isError ? colors.danger : AppColors.success,
           ),
         const SizedBox(width: 8),
         Expanded(
           child: Text(
             message,
             style: TextStyle(
-              color: isError ? AppColors.danger : AppColors.muted,
+              color: isError ? colors.danger : colors.muted,
               fontWeight: FontWeight.w800,
             ),
           ),
@@ -2159,17 +2225,20 @@ class _InlineError extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFF2F1),
-        borderRadius: BorderRadius.circular(18),
+        color: colors.danger.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: colors.danger.withValues(alpha: 0.18)),
       ),
       child: Text(
         message.toUpperCase(),
-        style: const TextStyle(
-          color: AppColors.danger,
+        style: TextStyle(
+          color: colors.danger,
           fontSize: 12,
           fontWeight: FontWeight.w900,
           letterSpacing: 1.8,
@@ -2192,18 +2261,21 @@ class _SizeChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return ChoiceChip(
       label: Text(label.toUpperCase()),
       selected: selected,
       onSelected: (_) => onTap(),
       showCheckmark: false,
-      selectedColor: AppColors.navy,
-      backgroundColor: AppColors.surfaceMuted,
+      selectedColor: colors.focus,
+      backgroundColor: colors.field,
       labelStyle: TextStyle(
-        color: selected ? Colors.white : AppColors.text,
+        color: selected ? colors.onFocus : colors.textStrong,
         fontWeight: FontWeight.w900,
       ),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+      side: BorderSide(color: selected ? colors.focus : colors.border),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
     );
   }
 }
@@ -2249,18 +2321,29 @@ class _ConfirmDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return AlertDialog(
-      backgroundColor: AppColors.surface,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-      title: Text(title, style: AppTextStyles.cardTitle),
-      content: Text(message, style: AppTextStyles.body),
+      backgroundColor: colors.surfaceRaised,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      title: Text(
+        title,
+        style: AppTextStyles.cardTitle.copyWith(color: colors.textStrong),
+      ),
+      content: Text(
+        message,
+        style: AppTextStyles.body.copyWith(color: colors.muted),
+      ),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(false),
           child: const Text('Annuler'),
         ),
         FilledButton(
-          style: FilledButton.styleFrom(backgroundColor: AppColors.navy),
+          style: FilledButton.styleFrom(
+            backgroundColor: colors.focus,
+            foregroundColor: colors.onFocus,
+          ),
           onPressed: () => Navigator.of(context).pop(true),
           child: Text(confirmLabel),
         ),
@@ -2276,19 +2359,19 @@ class _ErrorState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFF2F1),
-        borderRadius: BorderRadius.circular(22),
+        color: colors.danger.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: colors.danger.withValues(alpha: 0.18)),
       ),
       child: Text(
         message,
-        style: const TextStyle(
-          color: AppColors.danger,
-          fontWeight: FontWeight.w800,
-        ),
+        style: TextStyle(color: colors.danger, fontWeight: FontWeight.w800),
       ),
     );
   }

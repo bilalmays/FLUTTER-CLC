@@ -112,6 +112,8 @@ class _AssistantPageState extends ConsumerState<AssistantPage> {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setModalState) {
+            final colors = ClcThemeColors.of(context);
+
             void addRule() {
               final situation = situationController.text.trim();
               final correction = correctionController.text.trim();
@@ -151,8 +153,9 @@ class _AssistantPageState extends ConsumerState<AssistantPage> {
                 margin: const EdgeInsets.symmetric(horizontal: 0),
                 padding: const EdgeInsets.all(24),
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(28),
+                  color: colors.surfaceRaised,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: colors.border),
                   boxShadow: AppShadows.lifted,
                 ),
                 child: SingleChildScrollView(
@@ -166,6 +169,7 @@ class _AssistantPageState extends ConsumerState<AssistantPage> {
                             child: Text(
                               'Corrections IA',
                               style: AppTextStyles.cardTitle.copyWith(
+                                color: colors.textStrong,
                                 fontSize: 24,
                               ),
                             ),
@@ -179,7 +183,7 @@ class _AssistantPageState extends ConsumerState<AssistantPage> {
                       const SizedBox(height: 8),
                       Text(
                         'Ajoute une situation et la bonne règle. Ces corrections sont réutilisées dans les prochaines réponses Gemini.',
-                        style: AppTextStyles.body,
+                        style: AppTextStyles.body.copyWith(color: colors.muted),
                       ),
                       const SizedBox(height: 18),
                       TextField(
@@ -216,12 +220,15 @@ class _AssistantPageState extends ConsumerState<AssistantPage> {
                           width: double.infinity,
                           padding: const EdgeInsets.all(18),
                           decoration: BoxDecoration(
-                            color: AppColors.surfaceMuted,
-                            borderRadius: BorderRadius.circular(18),
+                            color: colors.field,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: colors.border),
                           ),
                           child: Text(
                             'Aucune correction enregistrée.',
-                            style: AppTextStyles.body,
+                            style: AppTextStyles.body.copyWith(
+                              color: colors.muted,
+                            ),
                           ),
                         )
                       else
@@ -472,6 +479,7 @@ class _AssistantHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
     final title = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -480,7 +488,7 @@ class _AssistantHeader extends StatelessWidget {
           style: AppTextStyles.pageTitle.copyWith(
             fontSize: 20,
             fontWeight: FontWeight.w800,
-            color: Colors.white,
+            color: colors.textStrong,
           ),
         ),
       ],
@@ -543,36 +551,35 @@ class _VoicePill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return Container(
       constraints: const BoxConstraints(minHeight: 42, maxWidth: 300),
       padding: const EdgeInsets.only(left: 16, right: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: colors.surfaceRaised,
         borderRadius: BorderRadius.circular(999),
-        boxShadow: const [
+        border: Border.all(color: colors.border),
+        boxShadow: [
           BoxShadow(
-            color: Color(0x0D000000),
+            color: colors.textStrong.withValues(alpha: 0.05),
             blurRadius: 8,
-            offset: Offset(0, 2),
+            offset: const Offset(0, 2),
           ),
         ],
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(
-            Icons.graphic_eq_rounded,
-            size: 18,
-            color: AppColors.muted,
-          ),
+          Icon(Icons.graphic_eq_rounded, size: 18, color: colors.muted),
           const SizedBox(width: 8),
           Flexible(
             child: Text(
               label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                color: AppColors.muted,
+              style: TextStyle(
+                color: colors.muted,
                 fontSize: 12,
                 fontWeight: FontWeight.w800,
               ),
@@ -599,8 +606,10 @@ class _HeaderActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return Material(
-      color: Colors.white,
+      color: colors.surfaceRaised,
       borderRadius: BorderRadius.circular(999),
       elevation: 0,
       child: InkWell(
@@ -611,23 +620,24 @@ class _HeaderActionButton extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(999),
-            boxShadow: const [
+            border: Border.all(color: colors.border),
+            boxShadow: [
               BoxShadow(
-                color: Color(0x0D000000),
+                color: colors.textStrong.withValues(alpha: 0.05),
                 blurRadius: 8,
-                offset: Offset(0, 2),
+                offset: const Offset(0, 2),
               ),
             ],
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: 17, color: AppColors.text),
+              Icon(icon, size: 17, color: colors.textStrong),
               const SizedBox(width: 8),
               Text(
                 label,
-                style: const TextStyle(
-                  color: AppColors.text,
+                style: TextStyle(
+                  color: colors.textStrong,
                   fontSize: 12,
                   fontWeight: FontWeight.w800,
                 ),
@@ -656,16 +666,17 @@ class _MessageBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isUser = message.role == ChatRole.user;
+    final colors = ClcThemeColors.of(context);
     final bubbleColor = message.isError
-        ? const Color(0xFFFFF2F1)
+        ? colors.danger.withValues(alpha: 0.08)
         : isUser
-        ? AppColors.navy
-        : Colors.white;
+        ? colors.focus
+        : colors.surfaceRaised;
     final textColor = message.isError
-        ? AppColors.danger
+        ? colors.danger
         : isUser
-        ? Colors.white
-        : AppColors.text;
+        ? colors.onFocus
+        : colors.textStrong;
 
     return Align(
       alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
@@ -691,15 +702,15 @@ class _MessageBubble extends StatelessWidget {
                     bottomRight: Radius.circular(isUser ? 4 : 20),
                   ),
                   border: message.isError
-                      ? Border.all(color: const Color(0xFFF2B8B5))
+                      ? Border.all(color: colors.danger.withValues(alpha: 0.25))
                       : null,
                   boxShadow: isUser || message.isError
                       ? const []
-                      : const [
+                      : [
                           BoxShadow(
-                            color: Color(0x0F000000),
+                            color: colors.textStrong.withValues(alpha: 0.06),
                             blurRadius: 20,
-                            offset: Offset(0, 4),
+                            offset: const Offset(0, 4),
                           ),
                         ],
                 ),
@@ -735,8 +746,8 @@ class _MessageBubble extends StatelessWidget {
                           _formatTime(message.createdAt),
                           style: TextStyle(
                             color: isUser
-                                ? Colors.white.withValues(alpha: 0.7)
-                                : const Color(0xFF9CA3AF),
+                                ? colors.onFocus.withValues(alpha: 0.7)
+                                : colors.muted,
                             fontSize: 10,
                             fontWeight: FontWeight.w800,
                           ),
@@ -752,7 +763,7 @@ class _MessageBubble extends StatelessWidget {
                               speaking
                                   ? Icons.pause_rounded
                                   : Icons.volume_up_outlined,
-                              color: const Color(0xFF9CA3AF),
+                              color: colors.muted,
                               size: 15,
                             ),
                           ),
@@ -780,6 +791,7 @@ class _RecommandationPanel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasPack = (response.recommendedPackName as String).isNotEmpty;
+    final colors = ClcThemeColors.of(context);
     if (!hasPack &&
         response.reasons.isEmpty &&
         response.suggestedOptions.isEmpty) {
@@ -790,35 +802,41 @@ class _RecommandationPanel extends StatelessWidget {
       margin: const EdgeInsets.only(top: 10),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.surfaceMuted,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.border),
+        color: colors.field,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: colors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'Recommandation'.toUpperCase(),
-            style: AppTextStyles.eyebrow.copyWith(letterSpacing: 2.2),
+            style: AppTextStyles.eyebrow.copyWith(
+              color: colors.focus,
+              letterSpacing: 2.2,
+            ),
           ),
           if (hasPack) ...[
             const SizedBox(height: 10),
             Text(
               response.recommendedPackName as String,
-              style: AppTextStyles.cardTitle,
+              style: AppTextStyles.cardTitle.copyWith(color: colors.textStrong),
             ),
           ],
           for (final reason in response.reasons as List<String>) ...[
             const SizedBox(height: 8),
-            Text('- $reason', style: AppTextStyles.body),
+            Text(
+              '- $reason',
+              style: AppTextStyles.body.copyWith(color: colors.muted),
+            ),
           ],
           if ((response.followUpQuestion as String).isNotEmpty) ...[
             const SizedBox(height: 12),
             Text(
               response.followUpQuestion as String,
-              style: const TextStyle(
+              style: TextStyle(
                 fontWeight: FontWeight.w900,
-                color: AppColors.text,
+                color: colors.textStrong,
               ),
             ),
           ],
@@ -835,6 +853,7 @@ class _QuickPrompts extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
     const prompts = [
       'Quel pack choisir ?',
       'Analyser mon véhicule',
@@ -857,11 +876,14 @@ class _QuickPrompts extends StatelessWidget {
             ActionChip(
               label: Text(prompt),
               onPressed: () => onSelected(prompt),
-              labelStyle: const TextStyle(fontWeight: FontWeight.w800),
-              backgroundColor: AppColors.surfaceMuted,
+              labelStyle: TextStyle(
+                color: colors.textStrong,
+                fontWeight: FontWeight.w800,
+              ),
+              backgroundColor: colors.field,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-                side: const BorderSide(color: AppColors.border),
+                borderRadius: BorderRadius.circular(8),
+                side: BorderSide(color: colors.border),
               ),
             ),
         ],
@@ -878,6 +900,8 @@ class _PendingImages extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 10),
@@ -897,13 +921,13 @@ class _PendingImages extends StatelessWidget {
                     child: Container(
                       width: 26,
                       height: 26,
-                      decoration: const BoxDecoration(
-                        color: AppColors.navy,
+                      decoration: BoxDecoration(
+                        color: colors.focus,
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.close_rounded,
-                        color: Colors.white,
+                        color: colors.onFocus,
                         size: 16,
                       ),
                     ),
@@ -961,6 +985,8 @@ class _Composer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return SafeArea(
       top: false,
       minimum: const EdgeInsets.fromLTRB(18, 12, 18, 18),
@@ -973,13 +999,14 @@ class _Composer extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.fromLTRB(18, 10, 10, 10),
                 decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: const [
+                  color: colors.surfaceRaised,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: colors.border),
+                  boxShadow: [
                     BoxShadow(
-                      color: Color(0x14000000),
+                      color: colors.textStrong.withValues(alpha: 0.08),
                       blurRadius: 30,
-                      offset: Offset(0, 8),
+                      offset: const Offset(0, 8),
                     ),
                   ],
                 ),
@@ -1000,8 +1027,8 @@ class _Composer extends StatelessWidget {
                           hintText:
                               'Décris le véhicule, les taches, les odeurs ou ajoute des photos…',
                         ),
-                        style: const TextStyle(
-                          color: AppColors.text,
+                        style: TextStyle(
+                          color: colors.textStrong,
                           fontSize: 15,
                           height: 1.45,
                           fontWeight: FontWeight.w600,
@@ -1063,6 +1090,8 @@ class _IconAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return Padding(
       padding: const EdgeInsets.only(left: 4),
       child: InkWell(
@@ -1072,16 +1101,16 @@ class _IconAction extends StatelessWidget {
           width: 42,
           height: 42,
           decoration: BoxDecoration(
-            color: selected ? AppColors.navy : Colors.transparent,
+            color: selected ? colors.focus : Colors.transparent,
             borderRadius: BorderRadius.circular(999),
           ),
           child: Icon(
             icon,
             color: selected
-                ? Colors.white
+                ? colors.onFocus
                 : enabled
-                ? AppColors.muted
-                : AppColors.muted.withValues(alpha: 0.42),
+                ? colors.muted
+                : colors.muted.withValues(alpha: 0.42),
           ),
         ),
       ),
@@ -1102,6 +1131,8 @@ class _SendRoundButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return InkWell(
       borderRadius: BorderRadius.circular(999),
       onTap: enabled ? onTap : null,
@@ -1109,14 +1140,12 @@ class _SendRoundButton extends StatelessWidget {
         width: 46,
         height: 46,
         decoration: BoxDecoration(
-          color: enabled
-              ? AppColors.navy
-              : AppColors.muted.withValues(alpha: 0.45),
+          color: enabled ? colors.focus : colors.muted.withValues(alpha: 0.45),
           borderRadius: BorderRadius.circular(999),
         ),
         child: Icon(
           sending ? Icons.more_horiz_rounded : Icons.send_rounded,
-          color: Colors.white,
+          color: colors.onFocus,
           size: 19,
         ),
       ),
@@ -1131,17 +1160,20 @@ class _ComposerError extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFF2F1),
-        borderRadius: BorderRadius.circular(16),
+        color: colors.danger.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: colors.danger.withValues(alpha: 0.18)),
       ),
       child: Text(
         message,
-        style: const TextStyle(
-          color: AppColors.danger,
+        style: TextStyle(
+          color: colors.danger,
           fontWeight: FontWeight.w800,
           fontSize: 12,
         ),
@@ -1155,25 +1187,28 @@ class _TypingBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return Align(
       alignment: Alignment.centerLeft,
       child: Container(
         margin: const EdgeInsets.only(bottom: 18),
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
         decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: const [
+          color: colors.surfaceRaised,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: colors.border),
+          boxShadow: [
             BoxShadow(
-              color: Color(0x0F000000),
+              color: colors.textStrong.withValues(alpha: 0.06),
               blurRadius: 20,
-              offset: Offset(0, 4),
+              offset: const Offset(0, 4),
             ),
           ],
         ),
-        child: const Text(
+        child: Text(
           'Assistant en train de répondre…',
-          style: AppTextStyles.body,
+          style: AppTextStyles.body.copyWith(color: colors.muted),
         ),
       ),
     );
@@ -1188,19 +1223,21 @@ class _CorrectionRuleTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return Container(
       width: double.infinity,
       margin: const EdgeInsets.only(bottom: 10),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.surfaceMuted,
-        borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: AppColors.border),
+        color: colors.field,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: colors.border),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.psychology_alt_outlined, color: AppColors.muted),
+          Icon(Icons.psychology_alt_outlined, color: colors.muted),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -1208,13 +1245,16 @@ class _CorrectionRuleTile extends StatelessWidget {
               children: [
                 Text(
                   rule.customerMessage,
-                  style: const TextStyle(
-                    color: AppColors.text,
+                  style: TextStyle(
+                    color: colors.textStrong,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
                 const SizedBox(height: 6),
-                Text(rule.correctionNote, style: AppTextStyles.body),
+                Text(
+                  rule.correctionNote,
+                  style: AppTextStyles.body.copyWith(color: colors.muted),
+                ),
               ],
             ),
           ),

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:car_luxe_cleaning_flutter/app/theme.dart';
+import 'package:car_luxe_cleaning_flutter/app/theme_scope.dart';
 import 'package:car_luxe_cleaning_flutter/core/widgets/app_button.dart';
 import 'package:car_luxe_cleaning_flutter/core/widgets/app_card.dart';
 import 'package:car_luxe_cleaning_flutter/features/auth/presentation/auth_scope.dart';
@@ -19,22 +20,24 @@ class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isMobile = Responsive.isMobile(context);
+    final colors = ClcThemeColors.of(context);
+    final themeScope = AppThemeScope.of(context);
 
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           AppCard(
-            color: const Color(0xFF050505),
-            borderColor: const Color(0x1AFFFFFF),
+            color: colors.field,
+            borderColor: colors.border,
             padding: EdgeInsets.all(isMobile ? 20 : 28),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
+              children: [
                 Text(
                   'CONTROL PANEL // BASE SETTINGS',
                   style: TextStyle(
-                    color: AppColors.accent,
+                    color: colors.focus,
                     fontSize: 10,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 3,
@@ -44,7 +47,7 @@ class SettingsPage extends StatelessWidget {
                 Text(
                   'Reglages',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: colors.textStrong,
                     fontSize: 38,
                     height: 0.95,
                     fontWeight: FontWeight.w300,
@@ -54,7 +57,7 @@ class SettingsPage extends StatelessWidget {
                 Text(
                   'Parametres visuels, contenus documentaires, integrations et maintenance.',
                   style: TextStyle(
-                    color: Color(0xFFA1A1AA),
+                    color: colors.muted,
                     fontSize: 15,
                     height: 1.45,
                     fontWeight: FontWeight.w500,
@@ -64,16 +67,26 @@ class SettingsPage extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 18),
-          const _SettingsSection(
+          _SettingsSection(
             icon: Icons.palette_outlined,
             title: 'Apparence',
             children: [
               _SettingsRow(
                 label: 'Theme actif',
-                value: 'Premium dark / #050505',
+                value: themeScope.isLight
+                    ? 'Light mode / #E5E7EB'
+                    : 'Premium dark / #050505',
               ),
-              _SettingsRow(label: 'Accent', value: '#AFF700'),
-              _SettingsRow(label: 'Interface', value: 'iPad optimized'),
+              _SettingsRow(
+                label: 'Accent',
+                value: themeScope.isLight ? '#0B0C0F' : '#AFF700',
+              ),
+              const _SettingsRow(
+                label: 'Interface',
+                value: 'Phones, iPad & tablets safe-area',
+              ),
+              const SizedBox(height: 16),
+              const _ThemeModeSelector(),
             ],
           ),
           const SizedBox(height: 14),
@@ -145,7 +158,6 @@ class SettingsPage extends StatelessWidget {
                     child: Text(
                       'Deconnectez-vous de la session actuelle.',
                       style: TextStyle(
-                        color: Color(0xFFA1A1AA),
                         fontSize: 13,
                         height: 1.45,
                         fontWeight: FontWeight.w600,
@@ -155,13 +167,13 @@ class SettingsPage extends StatelessWidget {
                   const SizedBox(width: 14),
                   FilledButton.icon(
                     style: FilledButton.styleFrom(
-                      backgroundColor: AppColors.danger.withValues(alpha: 0.10),
-                      foregroundColor: const Color(0xFFF87171),
+                      backgroundColor: colors.danger.withValues(alpha: 0.10),
+                      foregroundColor: colors.danger,
                       elevation: 0,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(8),
                         side: BorderSide(
-                          color: AppColors.danger.withValues(alpha: 0.25),
+                          color: colors.danger.withValues(alpha: 0.25),
                         ),
                       ),
                       padding: const EdgeInsets.symmetric(
@@ -289,9 +301,11 @@ class _SettingsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return AppCard(
-      color: const Color(0xFF050505),
-      borderColor: const Color(0x1AFFFFFF),
+      color: colors.field,
+      borderColor: colors.border,
       padding: EdgeInsets.zero,
       child: Theme(
         data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
@@ -299,13 +313,13 @@ class _SettingsSection extends StatelessWidget {
           initiallyExpanded: true,
           tilePadding: const EdgeInsets.symmetric(horizontal: 22, vertical: 8),
           childrenPadding: const EdgeInsets.fromLTRB(22, 0, 22, 22),
-          leading: Icon(icon, color: AppColors.accent, size: 18),
-          iconColor: AppColors.accent,
-          collapsedIconColor: Colors.white54,
+          leading: Icon(icon, color: colors.focus, size: 18),
+          iconColor: colors.focus,
+          collapsedIconColor: colors.muted,
           title: Text(
             title.toUpperCase(),
-            style: const TextStyle(
-              color: Colors.white,
+            style: TextStyle(
+              color: colors.textStrong,
               fontSize: 13,
               fontWeight: FontWeight.w900,
               letterSpacing: 2.2,
@@ -326,18 +340,20 @@ class _SettingsRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12),
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Color(0x14FFFFFF))),
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: colors.border)),
       ),
       child: Row(
         children: [
           Expanded(
             child: Text(
               label.toUpperCase(),
-              style: const TextStyle(
-                color: Color(0xFF71717A),
+              style: TextStyle(
+                color: colors.mutedStrong,
                 fontSize: 10,
                 fontWeight: FontWeight.w900,
                 letterSpacing: 1.8,
@@ -349,14 +365,133 @@ class _SettingsRow extends StatelessWidget {
             child: Text(
               value,
               textAlign: TextAlign.right,
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: colors.textStrong,
                 fontSize: 13,
                 fontWeight: FontWeight.w800,
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ThemeModeSelector extends StatelessWidget {
+  const _ThemeModeSelector();
+
+  @override
+  Widget build(BuildContext context) {
+    final scope = AppThemeScope.of(context);
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final twoColumns = constraints.maxWidth >= 560;
+        final width = twoColumns
+            ? (constraints.maxWidth - 12) / 2
+            : constraints.maxWidth;
+
+        return Wrap(
+          spacing: 12,
+          runSpacing: 12,
+          children: [
+            SizedBox(
+              width: width,
+              child: _ThemeModeOption(
+                icon: Icons.dark_mode_outlined,
+                label: 'Sombre',
+                value: 'Premium dark',
+                selected: !scope.isLight,
+                onTap: scope.isLight ? scope.toggleTheme : null,
+              ),
+            ),
+            SizedBox(
+              width: width,
+              child: _ThemeModeOption(
+                icon: Icons.light_mode_outlined,
+                label: 'Clair',
+                value: 'TypeScript light',
+                selected: scope.isLight,
+                onTap: scope.isLight ? null : scope.toggleTheme,
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _ThemeModeOption extends StatelessWidget {
+  const _ThemeModeOption({
+    required this.icon,
+    required this.label,
+    required this.value,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+  final bool selected;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+    final foreground = selected ? colors.onFocus : colors.textStrong;
+    final secondary = selected
+        ? colors.onFocus.withValues(alpha: 0.72)
+        : colors.muted;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(8),
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: selected ? colors.focus : colors.field,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: selected ? colors.focus : colors.border),
+          ),
+          child: Row(
+            children: [
+              Icon(icon, color: foreground, size: 20),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label.toUpperCase(),
+                      style: TextStyle(
+                        color: foreground,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1.8,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      value,
+                      style: TextStyle(
+                        color: secondary,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (selected) Icon(Icons.check_rounded, color: foreground),
+            ],
+          ),
+        ),
       ),
     );
   }

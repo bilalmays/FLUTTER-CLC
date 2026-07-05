@@ -62,15 +62,19 @@ class _TrashPageState extends ConsumerState<TrashPage> {
   }
 
   Future<void> _deleteForever(ClientVehicleBundle bundle) async {
+    final colors = ClcThemeColors.of(context);
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: AppColors.surface,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-        title: Text('Suppression definitive', style: AppTextStyles.cardTitle),
+        backgroundColor: colors.surfaceRaised,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        title: Text(
+          'Suppression definitive',
+          style: AppTextStyles.cardTitle.copyWith(color: colors.textStrong),
+        ),
         content: Text(
           'Supprimer ${bundle.client.name} et ses vehicules de façon definitive ?',
-          style: AppTextStyles.body,
+          style: AppTextStyles.body.copyWith(color: colors.muted),
         ),
         actions: [
           TextButton(
@@ -78,7 +82,7 @@ class _TrashPageState extends ConsumerState<TrashPage> {
             child: const Text('Annuler'),
           ),
           FilledButton(
-            style: FilledButton.styleFrom(backgroundColor: AppColors.danger),
+            style: FilledButton.styleFrom(backgroundColor: colors.danger),
             onPressed: () => Navigator.of(context).pop(true),
             child: const Text('Supprimer'),
           ),
@@ -119,6 +123,7 @@ class _TrashPageState extends ConsumerState<TrashPage> {
   @override
   Widget build(BuildContext context) {
     final isMobile = Responsive.isMobile(context);
+    final colors = ClcThemeColors.of(context);
 
     return SingleChildScrollView(
       child: Column(
@@ -152,13 +157,16 @@ class _TrashPageState extends ConsumerState<TrashPage> {
                     hintText: 'Nom, email, telephone, plaque...',
                     prefixIcon: Icon(Icons.search_rounded),
                   ),
-                  style: const TextStyle(fontWeight: FontWeight.w800),
+                  style: TextStyle(
+                    color: colors.textStrong,
+                    fontWeight: FontWeight.w800,
+                  ),
                 ),
                 const SizedBox(height: 18),
                 if (_loading)
-                  const Padding(
-                    padding: EdgeInsets.all(30),
-                    child: CircularProgressIndicator(color: AppColors.navy),
+                  Padding(
+                    padding: const EdgeInsets.all(30),
+                    child: CircularProgressIndicator(color: colors.focus),
                   )
                 else if (_error != null)
                   _TrashMessage(
@@ -200,12 +208,14 @@ class _ArchiveList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return Container(
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: colors.field,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: AppColors.border),
+        border: Border.all(color: colors.border),
       ),
       child: Column(
         children: [
@@ -216,7 +226,7 @@ class _ArchiveList extends StatelessWidget {
               onDeleteForever: () => onDeleteForever(archives[index]),
             ),
             if (index < archives.length - 1)
-              const Divider(height: 1, color: AppColors.border),
+              Divider(height: 1, color: colors.border),
           ],
         ],
       ),
@@ -238,6 +248,7 @@ class _ArchiveRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final vehicleCount = bundle.vehicles.length;
+    final colors = ClcThemeColors.of(context);
     final vehicles = bundle.vehicles
         .map((vehicle) => '${vehicle.make} ${vehicle.model}'.trim())
         .where((label) => label.isNotEmpty)
@@ -253,13 +264,10 @@ class _ArchiveRow extends StatelessWidget {
             height: 46,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: AppColors.surfaceMuted,
-              borderRadius: BorderRadius.circular(12),
+              color: colors.surfaceSoft,
+              borderRadius: BorderRadius.circular(8),
             ),
-            child: const Icon(
-              Icons.person_off_outlined,
-              color: AppColors.muted,
-            ),
+            child: Icon(Icons.person_off_outlined, color: colors.muted),
           ),
           const SizedBox(width: 14),
           Expanded(
@@ -268,8 +276,8 @@ class _ArchiveRow extends StatelessWidget {
               children: [
                 Text(
                   bundle.client.name,
-                  style: const TextStyle(
-                    color: AppColors.text,
+                  style: TextStyle(
+                    color: colors.textStrong,
                     fontWeight: FontWeight.w900,
                   ),
                 ),
@@ -281,8 +289,8 @@ class _ArchiveRow extends StatelessWidget {
                     '$vehicleCount vehicule${vehicleCount > 1 ? 's' : ''}',
                     vehicles,
                   ].where((value) => value.trim().isNotEmpty).join(' - '),
-                  style: const TextStyle(
-                    color: AppColors.muted,
+                  style: TextStyle(
+                    color: colors.muted,
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
                   ),
@@ -302,9 +310,9 @@ class _ArchiveRow extends StatelessWidget {
               ),
               OutlinedButton.icon(
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.danger,
+                  foregroundColor: colors.danger,
                   side: BorderSide(
-                    color: AppColors.danger.withValues(alpha: 0.35),
+                    color: colors.danger.withValues(alpha: 0.35),
                   ),
                 ),
                 onPressed: onDeleteForever,
@@ -332,24 +340,30 @@ class _TrashMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(26),
       decoration: BoxDecoration(
-        color: AppColors.surfaceMuted,
-        borderRadius: BorderRadius.circular(24),
+        color: colors.field,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: colors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: AppColors.muted),
+          Icon(icon, color: colors.muted),
           const SizedBox(height: 18),
           Text(
             title.toUpperCase(),
-            style: AppTextStyles.cardTitle.copyWith(fontSize: 18),
+            style: AppTextStyles.cardTitle.copyWith(
+              color: colors.textStrong,
+              fontSize: 18,
+            ),
           ),
           const SizedBox(height: 8),
-          Text(text, style: AppTextStyles.body),
+          Text(text, style: AppTextStyles.body.copyWith(color: colors.muted)),
         ],
       ),
     );

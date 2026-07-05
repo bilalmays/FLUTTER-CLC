@@ -10,14 +10,10 @@ class PackagesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isMobile = Responsive.isMobile(context);
+    final colors = ClcThemeColors.of(context);
     final columns = isMobile ? 1 : 3;
     final groups = _packageGroups
-        .map(
-          (group) => (
-            group: group,
-            services: _servicesForGroup(group),
-          ),
-        )
+        .map((group) => (group: group, services: _servicesForGroup(group)))
         .toList();
 
     return SingleChildScrollView(
@@ -30,23 +26,23 @@ class PackagesPage extends StatelessWidget {
             alignment: WrapAlignment.spaceBetween,
             crossAxisAlignment: WrapCrossAlignment.center,
             children: [
-              const Column(
+              Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     'CONFIGURATION',
                     style: TextStyle(
-                      color: AppColors.accent,
+                      color: colors.focus,
                       fontSize: 10,
                       fontWeight: FontWeight.w900,
                       letterSpacing: 3.5,
                     ),
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   Text(
                     'Catalogue des Services',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: colors.textStrong,
                       fontSize: 46,
                       height: 0.96,
                       fontWeight: FontWeight.w300,
@@ -155,22 +151,29 @@ class _HeaderButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+    final background = muted ? Colors.transparent : colors.action;
+    final foreground = muted ? colors.mutedStrong : colors.onAction;
+
     return Material(
-      color: muted ? Colors.transparent : Colors.white,
+      color: background,
       child: InkWell(
         onTap: onTap,
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16),
           decoration: BoxDecoration(
-            color: muted ? Colors.transparent : Colors.white,
+            color: background,
+            borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: muted ? const Color(0x14FFFFFF) : Colors.transparent,
+              color: muted ? colors.border : Colors.transparent,
             ),
             boxShadow: muted
                 ? const []
                 : [
                     BoxShadow(
-                      color: Colors.white.withValues(alpha: 0.06),
+                      color: colors.action.withValues(
+                        alpha: colors.isLight ? 0.10 : 0.06,
+                      ),
                       blurRadius: 18,
                       offset: const Offset(0, 8),
                     ),
@@ -179,16 +182,12 @@ class _HeaderButton extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(
-                icon,
-                size: 16,
-                color: muted ? const Color(0xFF71717A) : Colors.black,
-              ),
+              Icon(icon, size: 16, color: foreground),
               const SizedBox(width: 10),
               Text(
                 label.toUpperCase(),
                 style: TextStyle(
-                  color: muted ? const Color(0xFF71717A) : Colors.black,
+                  color: foreground,
                   fontSize: 10,
                   fontWeight: FontWeight.w900,
                   letterSpacing: 2,
@@ -203,34 +202,31 @@ class _HeaderButton extends StatelessWidget {
 }
 
 class _PackageColumn extends StatelessWidget {
-  const _PackageColumn({
-    required this.group,
-    required this.services,
-  });
+  const _PackageColumn({required this.group, required this.services});
 
   final _PackageGroup group;
   final List<ServiceCatalogEntry> services;
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return Column(
       children: [
         Container(
           padding: const EdgeInsets.fromLTRB(8, 0, 8, 16),
-          decoration: const BoxDecoration(
-            border: Border(
-              bottom: BorderSide(color: Color(0x14FFFFFF)),
-            ),
+          decoration: BoxDecoration(
+            border: Border(bottom: BorderSide(color: colors.border)),
           ),
           child: Row(
             children: [
-              Icon(group.icon, color: AppColors.accent, size: 17),
+              Icon(group.icon, color: colors.focus, size: 17),
               const SizedBox(width: 12),
               Expanded(
                 child: Text(
                   group.label.toUpperCase(),
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: colors.textStrong,
                     fontSize: 10,
                     fontWeight: FontWeight.w900,
                     letterSpacing: 3,
@@ -239,8 +235,8 @@ class _PackageColumn extends StatelessWidget {
               ),
               Text(
                 '${services.length} ITEMS',
-                style: const TextStyle(
-                  color: Color(0xFF52525B),
+                style: TextStyle(
+                  color: colors.mutedStrong,
                   fontSize: 10,
                   fontWeight: FontWeight.w700,
                   letterSpacing: 1.5,
@@ -269,15 +265,18 @@ class _PackageCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return Container(
       padding: const EdgeInsets.all(24),
-      decoration: const BoxDecoration(
-        color: Color(0xFF0B0B0C),
+      decoration: BoxDecoration(
+        color: colors.field,
+        borderRadius: BorderRadius.circular(8),
         border: Border(
-          left: BorderSide(color: AppColors.accent, width: 4),
-          top: BorderSide(color: Color(0x14FFFFFF)),
-          right: BorderSide(color: Color(0x14FFFFFF)),
-          bottom: BorderSide(color: Color(0x14FFFFFF)),
+          left: BorderSide(color: colors.focus, width: 4),
+          top: BorderSide(color: colors.border),
+          right: BorderSide(color: colors.border),
+          bottom: BorderSide(color: colors.border),
         ),
       ),
       child: Column(
@@ -291,8 +290,8 @@ class _PackageCard extends StatelessWidget {
                   children: [
                     Text(
                       service.label.toUpperCase(),
-                      style: const TextStyle(
-                        color: Colors.white,
+                      style: TextStyle(
+                        color: colors.textStrong,
                         fontSize: 18,
                         height: 1.05,
                         fontWeight: FontWeight.w300,
@@ -301,8 +300,8 @@ class _PackageCard extends StatelessWidget {
                     const SizedBox(height: 10),
                     Text(
                       _descriptionFor(service),
-                      style: const TextStyle(
-                        color: Color(0xFF71717A),
+                      style: TextStyle(
+                        color: colors.mutedStrong,
                         fontSize: 10,
                         height: 1.5,
                         fontWeight: FontWeight.w700,
@@ -316,8 +315,8 @@ class _PackageCard extends StatelessWidget {
               Text(
                 _priceFor(service),
                 textAlign: TextAlign.right,
-                style: const TextStyle(
-                  color: Colors.white,
+                style: TextStyle(
+                  color: colors.textStrong,
                   fontSize: 16,
                   fontWeight: FontWeight.w300,
                 ),
@@ -325,14 +324,14 @@ class _PackageCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 20),
-          const Divider(color: Color(0x14FFFFFF), height: 1),
+          Divider(color: colors.border, height: 1),
           const SizedBox(height: 10),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
-            children: const [
-              _GhostIcon(icon: Icons.edit_outlined),
-              SizedBox(width: 4),
-              _GhostIcon(icon: Icons.delete_outline, danger: true),
+            children: [
+              const _GhostIcon(icon: Icons.edit_outlined),
+              const SizedBox(width: 4),
+              const _GhostIcon(icon: Icons.delete_outline, danger: true),
             ],
           ),
         ],
@@ -361,13 +360,15 @@ class _GhostIcon extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return IconButton(
       tooltip: danger ? 'Supprimer' : 'Modifier',
       onPressed: () {},
       icon: Icon(
         icon,
         size: 16,
-        color: danger ? AppColors.danger : const Color(0xFF52525B),
+        color: danger ? colors.danger : colors.mutedStrong,
       ),
     );
   }
@@ -378,21 +379,24 @@ class _PackagePlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return Container(
       height: 180,
       decoration: BoxDecoration(
-        border: Border.all(color: const Color(0x14FFFFFF), width: 2),
+        border: Border.all(color: colors.border, width: 2),
+        borderRadius: BorderRadius.circular(8),
       ),
-      child: const Center(
+      child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(Icons.sell_outlined, color: Color(0xFF27272A), size: 34),
-            SizedBox(height: 14),
+            Icon(Icons.sell_outlined, color: colors.mutedStrong, size: 34),
+            const SizedBox(height: 14),
             Text(
               'PACKAGE_PLACEHOLDER',
               style: TextStyle(
-                color: Color(0xFF27272A),
+                color: colors.mutedStrong,
                 fontSize: 10,
                 fontWeight: FontWeight.w900,
                 letterSpacing: 2,

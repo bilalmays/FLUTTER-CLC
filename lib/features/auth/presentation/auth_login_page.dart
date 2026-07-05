@@ -40,8 +40,10 @@ class _AuthLoginPageState extends State<AuthLoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: colors.bg,
       body: SafeArea(
         child: Stack(
           children: [
@@ -53,13 +55,16 @@ class _AuthLoginPageState extends State<AuthLoginPage> {
                   constraints: const BoxConstraints(maxWidth: 440),
                   child: DecoratedBox(
                     decoration: BoxDecoration(
-                      color: const Color(0xFF050505),
-                      border: Border.all(color: const Color(0x1AFFFFFF)),
-                      boxShadow: const [
+                      color: colors.field,
+                      border: Border.all(color: colors.border),
+                      borderRadius: BorderRadius.circular(8),
+                      boxShadow: [
                         BoxShadow(
-                          color: Color(0x99000000),
+                          color: colors.textStrong.withValues(
+                            alpha: colors.isLight ? 0.12 : 0.60,
+                          ),
                           blurRadius: 42,
-                          offset: Offset(0, 22),
+                          offset: const Offset(0, 22),
                         ),
                       ],
                     ),
@@ -83,30 +88,30 @@ class _AuthLoginPageState extends State<AuthLoginPage> {
                                 setState(() => _error = null);
                               }
                             },
-                            style: const TextStyle(
-                              color: Colors.white,
+                            style: TextStyle(
+                              color: colors.textStrong,
                               fontWeight: FontWeight.w800,
                             ),
                             decoration: InputDecoration(
                               labelText: "CODE D'ACCES",
                               hintText: 'Code interne',
-                              hintStyle: const TextStyle(color: Colors.white30),
+                              hintStyle: TextStyle(
+                                color: colors.muted.withValues(alpha: 0.55),
+                              ),
                               filled: true,
-                              fillColor: Colors.black,
-                              prefixIcon: const Icon(
+                              fillColor: colors.surfaceRaised,
+                              prefixIcon: Icon(
                                 Icons.lock_outline_rounded,
-                                color: AppColors.accent,
+                                color: colors.focus,
                               ),
                               enabledBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
-                                borderSide: const BorderSide(
-                                  color: Color(0x1AFFFFFF),
-                                ),
+                                borderSide: BorderSide(color: colors.border),
                               ),
                               focusedBorder: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8),
-                                borderSide: const BorderSide(
-                                  color: AppColors.accent,
+                                borderSide: BorderSide(
+                                  color: colors.focus,
                                   width: 1.4,
                                 ),
                               ),
@@ -118,17 +123,16 @@ class _AuthLoginPageState extends State<AuthLoginPage> {
                               width: double.infinity,
                               padding: const EdgeInsets.all(14),
                               decoration: BoxDecoration(
-                                color: AppColors.danger.withValues(alpha: 0.08),
+                                color: colors.danger.withValues(alpha: 0.08),
+                                borderRadius: BorderRadius.circular(8),
                                 border: Border.all(
-                                  color: AppColors.danger.withValues(
-                                    alpha: 0.25,
-                                  ),
+                                  color: colors.danger.withValues(alpha: 0.25),
                                 ),
                               ),
                               child: Text(
                                 _error!,
-                                style: const TextStyle(
-                                  color: Color(0xFFFECACA),
+                                style: TextStyle(
+                                  color: colors.danger,
                                   fontWeight: FontWeight.w800,
                                 ),
                               ),
@@ -160,13 +164,15 @@ class AuthLoadingPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      backgroundColor: Colors.black,
+    final colors = ClcThemeColors.of(context);
+
+    return Scaffold(
+      backgroundColor: colors.bg,
       body: SafeArea(
         child: Stack(
           children: [
-            Positioned.fill(child: _AuthBackdrop()),
-            Center(child: CircularProgressIndicator(color: AppColors.accent)),
+            const Positioned.fill(child: _AuthBackdrop()),
+            Center(child: CircularProgressIndicator(color: colors.focus)),
           ],
         ),
       ),
@@ -179,6 +185,8 @@ class _AuthHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return Row(
       children: [
         Container(
@@ -186,20 +194,21 @@ class _AuthHeader extends StatelessWidget {
           height: 52,
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.06),
-            border: Border.all(color: const Color(0x1AFFFFFF)),
+            color: colors.surfaceRaised,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: colors.border),
           ),
-          child: const Text(
+          child: Text(
             'CL',
             style: TextStyle(
-              color: Colors.white,
+              color: colors.textStrong,
               fontSize: 20,
               fontWeight: FontWeight.w900,
             ),
           ),
         ),
         const SizedBox(width: 14),
-        const Expanded(
+        Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -209,23 +218,23 @@ class _AuthHeader extends StatelessWidget {
                   children: [
                     TextSpan(
                       text: 'LUXE',
-                      style: TextStyle(color: AppColors.accent),
+                      style: TextStyle(color: colors.focus),
                     ),
-                    TextSpan(text: ' CLEANING'),
+                    const TextSpan(text: ' CLEANING'),
                   ],
                 ),
                 style: TextStyle(
-                  color: Color(0xFFA1A1AA),
+                  color: colors.muted,
                   fontSize: 10,
                   fontWeight: FontWeight.w900,
                   letterSpacing: 3.5,
                 ),
               ),
-              SizedBox(height: 5),
+              const SizedBox(height: 5),
               Text(
                 'Connexion CRM',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: colors.textStrong,
                   fontSize: 25,
                   fontWeight: FontWeight.w300,
                 ),
@@ -243,13 +252,15 @@ class _AuthBackdrop extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     return DecoratedBox(
       decoration: BoxDecoration(
         gradient: RadialGradient(
           center: const Alignment(-0.25, -0.9),
           radius: 0.85,
           colors: [
-            AppColors.accent.withValues(alpha: 0.16),
+            colors.focus.withValues(alpha: colors.isLight ? 0.06 : 0.16),
             const Color(0x00000000),
           ],
         ),
@@ -260,7 +271,9 @@ class _AuthBackdrop extends StatelessWidget {
             center: const Alignment(0.95, 0.85),
             radius: 0.75,
             colors: [
-              Colors.white.withValues(alpha: 0.07),
+              colors.surfaceRaised.withValues(
+                alpha: colors.isLight ? 0.24 : 0.07,
+              ),
               const Color(0x00000000),
             ],
           ),

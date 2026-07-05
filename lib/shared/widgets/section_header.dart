@@ -17,15 +17,26 @@ class SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
     final textBlock = Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(eyebrow.toUpperCase(), style: AppTextStyles.eyebrow),
+        Text(
+          eyebrow.toUpperCase(),
+          style: AppTextStyles.eyebrow.copyWith(color: colors.focus),
+        ),
         const SizedBox(height: 14),
-        Text(title, style: AppTextStyles.pageTitle),
+        Text(
+          title,
+          style: AppTextStyles.pageTitle.copyWith(color: colors.textStrong),
+        ),
         if (subtitle != null) ...[
           const SizedBox(height: 12),
-          Text(subtitle!, style: AppTextStyles.body),
+          Text(
+            subtitle!,
+            style: AppTextStyles.body.copyWith(color: colors.muted),
+          ),
         ],
       ],
     );
