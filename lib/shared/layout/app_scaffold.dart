@@ -1,5 +1,6 @@
 import 'package:car_luxe_cleaning_flutter/app/theme.dart';
 import 'package:car_luxe_cleaning_flutter/app/theme_scope.dart';
+import 'package:car_luxe_cleaning_flutter/features/auth/presentation/auth_scope.dart';
 import 'package:car_luxe_cleaning_flutter/shared/layout/responsive.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -45,6 +46,18 @@ const appSettingsItem = AppNavItem(
   label: 'Réglages',
   icon: Icons.settings_outlined,
 );
+
+void _openAdminRoute(BuildContext context) {
+  final auth = AuthScope.maybeOf(context);
+  if (auth?.session.isAdmin == true) {
+    context.go('/secret-document');
+    return;
+  }
+
+  ScaffoldMessenger.of(
+    context,
+  ).showSnackBar(const SnackBar(content: Text('Acces reserve admin.')));
+}
 
 class AppScaffold extends StatelessWidget {
   const AppScaffold({
@@ -111,7 +124,7 @@ class _SideNavigationState extends State<_SideNavigation> {
     _secretTapCount += 1;
     if (_secretTapCount >= 7) {
       _secretTapCount = 0;
-      context.go('/secret-document');
+      _openAdminRoute(context);
     }
   }
 
@@ -206,7 +219,7 @@ class _BottomNavigationState extends State<_BottomNavigation> {
     _secretTapCount += 1;
     if (_secretTapCount >= 7) {
       _secretTapCount = 0;
-      context.go('/secret-document');
+      _openAdminRoute(context);
     }
   }
 

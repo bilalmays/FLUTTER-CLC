@@ -26,7 +26,7 @@ class Responsive {
       case AppBreakpoint.tablet:
         return 24;
       case AppBreakpoint.wide:
-        return 32;
+        return 40;
     }
   }
 }

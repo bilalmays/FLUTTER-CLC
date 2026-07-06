@@ -3,6 +3,7 @@ import 'package:car_luxe_cleaning_flutter/features/basket/presentation/basket_co
 import 'package:car_luxe_cleaning_flutter/features/clients/presentation/clients_page.dart';
 import 'package:car_luxe_cleaning_flutter/features/dashboard/presentation/dashboard_page.dart';
 import 'package:car_luxe_cleaning_flutter/features/documents/presentation/documents_page.dart';
+import 'package:car_luxe_cleaning_flutter/features/auth/presentation/auth_scope.dart';
 import 'package:car_luxe_cleaning_flutter/features/packages/presentation/packages_page.dart';
 import 'package:car_luxe_cleaning_flutter/features/secret_document/presentation/secret_document_page.dart';
 import 'package:car_luxe_cleaning_flutter/features/settings/presentation/settings_page.dart';
@@ -14,6 +15,14 @@ import 'package:go_router/go_router.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/basket',
+  redirect: (context, state) {
+    final path = state.matchedLocation;
+    if (path == '/secret-document') {
+      final auth = AuthScope.maybeOf(context);
+      if (auth?.session.isAdmin != true) return '/basket';
+    }
+    return null;
+  },
   routes: [
     GoRoute(path: '/', redirect: (context, state) => '/basket'),
     GoRoute(

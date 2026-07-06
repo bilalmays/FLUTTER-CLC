@@ -1,5 +1,4 @@
 import 'package:car_luxe_cleaning_flutter/app/theme.dart';
-import 'package:car_luxe_cleaning_flutter/core/widgets/app_button.dart';
 import 'package:car_luxe_cleaning_flutter/core/widgets/app_card.dart';
 import 'package:car_luxe_cleaning_flutter/features/documents/domain/document_module.dart';
 import 'package:car_luxe_cleaning_flutter/features/documents/presentation/document_builders.dart';
@@ -36,37 +35,61 @@ class _DocumentsPageState extends State<DocumentsPage> {
   Widget build(BuildContext context) {
     final isMobile = Responsive.isMobile(context);
     final colors = ClcThemeColors.of(context);
+    final title = _activeModule?.label ?? 'Documents';
 
     return SingleChildScrollView(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AppCard(
-            color: colors.field,
-            borderColor: colors.border,
-            padding: EdgeInsets.all(isMobile ? 20 : 28),
-            child: _DocumentsHeader(
-              eyebrow: _activeModule == null ? 'Documents' : 'Module document',
-              title: _activeModule?.label ?? 'Documents',
-              subtitle:
-                  _activeModule?.note ??
-                  'Devis, carnets, acomptes, etats des lieux, service pick-up et historique.',
-              trailing: _activeModule == null
-                  ? null
-                  : AppButton(
-                      label: 'Retour',
-                      icon: Icons.arrow_back_rounded,
-                      tone: AppButtonTone.secondary,
-                      onPressed: () => setState(() => _activeModule = null),
+          Row(
+            children: [
+              if (_activeModule != null) ...[
+                TextButton.icon(
+                  onPressed: () => setState(() => _activeModule = null),
+                  icon: Icon(
+                    Icons.arrow_back_rounded,
+                    size: 14,
+                    color: colors.muted,
+                  ),
+                  label: Text(
+                    'RETOUR',
+                    style: TextStyle(
+                      color: colors.muted,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.8,
                     ),
-            ),
+                  ),
+                ),
+                const SizedBox(width: 16),
+              ],
+              Expanded(
+                child: Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: colors.textStrong,
+                    fontSize: isMobile ? 36 : 48,
+                    height: 0.95,
+                    fontWeight: FontWeight.w300,
+                  ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 22),
+          SizedBox(height: isMobile ? 26 : 38),
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 180),
             child: _activeModule == null
-                ? _DocumentModuleGrid(
-                    onOpen: (module) => setState(() => _activeModule = module),
+                ? Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 896),
+                      child: _DocumentModuleGrid(
+                        onOpen: (module) =>
+                            setState(() => _activeModule = module),
+                      ),
+                    ),
                   )
                 : _DocumentModuleView(module: _activeModule!),
           ),
@@ -84,69 +107,6 @@ DocumentModule? _moduleFromInitialId(String? id) {
   return null;
 }
 
-class _DocumentsHeader extends StatelessWidget {
-  const _DocumentsHeader({
-    required this.eyebrow,
-    required this.title,
-    required this.subtitle,
-    this.trailing,
-  });
-
-  final String eyebrow;
-  final String title;
-  final String subtitle;
-  final Widget? trailing;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = ClcThemeColors.of(context);
-    final text = Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          eyebrow.toUpperCase(),
-          style: TextStyle(
-            color: colors.focus,
-            fontSize: 10,
-            fontWeight: FontWeight.w900,
-            letterSpacing: 3,
-          ),
-        ),
-        const SizedBox(height: 12),
-        Text(
-          title,
-          style: TextStyle(
-            color: colors.textStrong,
-            fontSize: 38,
-            height: 0.95,
-            fontWeight: FontWeight.w300,
-          ),
-        ),
-        const SizedBox(height: 12),
-        Text(
-          subtitle,
-          style: TextStyle(
-            color: colors.muted,
-            fontSize: 15,
-            height: 1.45,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ],
-    );
-
-    if (trailing == null) return text;
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Expanded(child: text),
-        const SizedBox(width: 18),
-        trailing!,
-      ],
-    );
-  }
-}
-
 class _DocumentModuleGrid extends StatelessWidget {
   const _DocumentModuleGrid({required this.onOpen});
 
@@ -157,11 +117,7 @@ class _DocumentModuleGrid extends StatelessWidget {
     return LayoutBuilder(
       key: const ValueKey('document-grid'),
       builder: (context, constraints) {
-        final columns = constraints.maxWidth < 720
-            ? 1
-            : constraints.maxWidth < 1080
-            ? 2
-            : 3;
+        final columns = constraints.maxWidth < 720 ? 1 : 2;
         final width = (constraints.maxWidth - ((columns - 1) * 16)) / columns;
 
         return Wrap(
@@ -195,46 +151,70 @@ class _DocumentModuleCard extends StatelessWidget {
 
     return AppCard(
       onTap: onTap,
-      color: colors.field,
-      borderColor: colors.border,
-      padding: const EdgeInsets.all(22),
+      color: colors.isLight ? colors.surface : colors.shell,
+      borderColor: colors.isLight ? colors.borderStrong : colors.border,
+      padding: EdgeInsets.zero,
       child: ConstrainedBox(
-        constraints: const BoxConstraints(minHeight: 178),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        constraints: const BoxConstraints(minHeight: 120),
+        child: Stack(
           children: [
-            Row(
-              children: [
-                Container(
-                  width: 52,
-                  height: 52,
-                  decoration: BoxDecoration(
-                    color: colors.focus.withValues(
-                      alpha: colors.isLight ? 0.07 : 0.10,
-                    ),
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(
-                      color: colors.focus.withValues(alpha: 0.30),
-                    ),
-                  ),
-                  child: Icon(module.icon, color: colors.focus),
-                ),
-                const Spacer(),
-                Icon(Icons.arrow_forward_rounded, color: colors.mutedStrong),
-              ],
-            ),
-            const SizedBox(height: 24),
-            Text(
-              module.label.toUpperCase(),
-              style: AppTextStyles.cardTitle.copyWith(
-                color: colors.textStrong,
-                fontSize: 17,
+            Positioned(
+              left: 0,
+              right: 0,
+              top: 0,
+              child: Container(
+                height: 3,
+                color: colors.isLight
+                    ? colors.borderStrong
+                    : Colors.white.withValues(alpha: 0.10),
               ),
             ),
-            const SizedBox(height: 8),
-            Text(
-              module.note,
-              style: AppTextStyles.body.copyWith(color: colors.muted),
+            Padding(
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 48,
+                    height: 48,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      color: colors.isLight ? colors.surface : Colors.black,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: colors.isLight
+                            ? colors.borderStrong
+                            : colors.border,
+                      ),
+                    ),
+                    child: Icon(
+                      module.icon,
+                      color: colors.isLight ? colors.mutedStrong : colors.muted,
+                      size: 20,
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    module.label.toUpperCase(),
+                    style: TextStyle(
+                      color: colors.textStrong,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 2.1,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    module.note,
+                    style: TextStyle(
+                      color: colors.isLight ? colors.textStrong : colors.muted,
+                      fontSize: 12,
+                      height: 1.35,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),

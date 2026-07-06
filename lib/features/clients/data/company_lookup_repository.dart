@@ -82,6 +82,21 @@ class CompanyLookupResult {
       ownerName: read('ownerName'),
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'cbeNumber': cbeNumber,
+    'vatNumber': vatNumber,
+    'name': name,
+    'displayName': displayName,
+    'companyName': companyName,
+    'denomination': denomination,
+    'address': address,
+    'email': email,
+    'phone': phone,
+    'representativeName': representativeName,
+    'contactName': contactName,
+    'ownerName': ownerName,
+  };
 }
 
 class CompanyLookupRepository {

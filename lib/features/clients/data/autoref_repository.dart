@@ -47,6 +47,15 @@ class AutorefVehicleResult {
           : read('color'),
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'make': make,
+    'model': model,
+    'year': year,
+    'vin': vin,
+    'licensePlate': licensePlate,
+    'color': color,
+  };
 }
 
 class AutorefRepository {

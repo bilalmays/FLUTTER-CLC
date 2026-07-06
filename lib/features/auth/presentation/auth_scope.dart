@@ -12,8 +12,14 @@ class AuthScope extends InheritedWidget {
   final AuthSession session;
   final Future<void> Function() logout;
 
+  bool get isAdmin => session.isAdmin;
+
+  static AuthScope? maybeOf(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<AuthScope>();
+  }
+
   static AuthScope of(BuildContext context) {
-    final scope = context.dependOnInheritedWidgetOfExactType<AuthScope>();
+    final scope = maybeOf(context);
     assert(scope != null, 'AuthScope is missing from the widget tree.');
     return scope!;
   }

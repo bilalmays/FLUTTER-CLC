@@ -53,6 +53,20 @@ class AssistantResponse {
           json['requiresHumanInspection'] as bool? ?? false,
     );
   }
+
+  Map<String, dynamic> toJson() => {
+    'type': _typeToJson(type),
+    'reply': reply,
+    'recommendedPackCode': recommendedPackCode,
+    'recommendedPackName': recommendedPackName,
+    'alternativePackCode': alternativePackCode,
+    'alternativePackName': alternativePackName,
+    'confidence': confidence,
+    'reasons': reasons,
+    'suggestedOptions': suggestedOptions,
+    'followUpQuestion': followUpQuestion,
+    'requiresHumanInspection': requiresHumanInspection,
+  };
 }
 
 AssistantResponseType _typeFromJson(Object? value) {
@@ -68,4 +82,14 @@ AssistantResponseType _typeFromJson(Object? value) {
     default:
       return AssistantResponseType.message;
   }
+}
+
+String _typeToJson(AssistantResponseType value) {
+  return switch (value) {
+    AssistantResponseType.question => 'question',
+    AssistantResponseType.recommendation => 'recommendation',
+    AssistantResponseType.comparison => 'comparison',
+    AssistantResponseType.photoAnalysis => 'photo_analysis',
+    AssistantResponseType.message => 'message',
+  };
 }
