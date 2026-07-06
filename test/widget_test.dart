@@ -24,6 +24,7 @@ void main() {
 
     expect(find.text('PANIER'), findsOneWidget);
     expect(find.text('CATEGORIE DE PRESTATION'), findsOneWidget);
-    expect(find.text('LAVAGE'), findsOneWidget);
+    expect(find.text('INTÉRIEUR'), findsOneWidget);
+    expect(find.text('EXTÉRIEUR'), findsOneWidget);
   });
 }

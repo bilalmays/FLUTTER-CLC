@@ -1,0 +1,730 @@
+﻿[
+    {
+        "id":  "capot-1",
+        "label":  "Capot",
+        "price":  100,
+        "profile":  "Camionette",
+        "view":  "front",
+        "points":  "335,426 363,434 402,438 722,438 1077,435 1108,424 1128,439 1148,479 1140,522 1013,569 986,578 730,582 477,578 430,572 430,572 304,521 296,477 319,446",
+        "labelX":  689,
+        "labelY":  496,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "montant-droit-3",
+        "label":  "Montant (droit)",
+        "price":  80,
+        "profile":  "Camionette",
+        "view":  "front",
+        "points":  "296,372 308,362 327,358 363,169 367,165 394,90 367,102 355,122",
+        "labelX":  347,
+        "labelY":  218,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "montant-gauche-4",
+        "label":  "Montant (gauche)",
+        "price":  80,
+        "profile":  "Camionette",
+        "view":  "front",
+        "points":  "1120,359 1136,363 1148,371 1112,201 1084,114 1069,95 1045,91 1073,162 1088,170",
+        "labelX":  1097,
+        "labelY":  214,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "retroviseur-droit-5",
+        "label":  "Rétroviseur (droit)",
+        "price":  25,
+        "profile":  "Camionette",
+        "view":  "front",
+        "points":  "268,402 264,331 260,323 201,319 189,335 181,430 189,446 244,450 260,450 268,434 284,454 292,405",
+        "labelX":  242,
+        "labelY":  398,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "retroviseur-gauche-6",
+        "label":  "Rétroviseur (gauche)",
+        "price":  25,
+        "profile":  "Camionette",
+        "view":  "front",
+        "points":  "1179,400 1179,337 1187,321 1238,317 1262,333 1266,428 1254,447 1199,451 1183,447 1183,431 1163,451 1151,404",
+        "labelX":  1204,
+        "labelY":  397,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "aile-avant-droit-7",
+        "label":  "Aile (avant-droit)",
+        "price":  80,
+        "profile":  "Camionette",
+        "view":  "front",
+        "points":  "292,376 308,360 323,360 323,404 331,428 292,475 300,514 288,534 284,554 284,577 284,613 284,613 272,648 248,715 241,633 268,577",
+        "labelX":  289,
+        "labelY":  524,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "aile-avant-gauche-8",
+        "label":  "Aile (avant-gauche)",
+        "price":  80,
+        "profile":  "Camionette",
+        "view":  "front",
+        "points":  "1116,360 1128,400 1112,424 1144,471 1144,518 1151,522 1163,601 1155,613 1167,629 1167,640 1191,688 1199,711 1199,633 1187,577 1163,455 1148,376",
+        "labelX":  1158,
+        "labelY":  539,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "pare-chocs-avant-9",
+        "label":  "Pare-chocs (avant)",
+        "price":  120,
+        "profile":  "Camionette",
+        "view":  "front",
+        "points":  "442,593 450,629 414,644 288,621 288,617 272,648 244,715 256,798 252,826 292,917 430,925 434,925 1002,921 1009,925 1155,917 1175,858 1191,815 1195,767 1203,716 1167,645 1171,633 1155,622 1037,645 994,629 1009,574 457,578 438,574",
+        "labelX":  719,
+        "labelY":  729,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "phare-gauche-10",
+        "label":  "Phare (gauche)",
+        "price":  60,
+        "profile":  "Camionette",
+        "view":  "front",
+        "points":  "994,625 1009,574 1132,527 1155,578 1155,614 1037,641",
+        "labelX":  1080,
+        "labelY":  593,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "phare-droit-11",
+        "label":  "Phare (droit)",
+        "price":  60,
+        "profile":  "Camionette",
+        "view":  "front",
+        "points":  "292,521 284,577 292,620 410,644 446,628 430,577",
+        "labelX":  359,
+        "labelY":  595,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "toit-11",
+        "label":  "Toit",
+        "price":  130,
+        "profile":  "Camionette",
+        "view":  "front",
+        "points":  "371,162 394,91 580,79 726,75 915,79 1045,91 1073,162 718,158",
+        "labelX":  728,
+        "labelY":  112,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "capot-13",
+        "label":  "Capot",
+        "price":  100,
+        "profile":  "Camionette",
+        "view":  "top",
+        "points":  "95,323 83,413 79,500 79,591 99,689 197,780 268,779 296,767 280,740 268,708 252,590 252,416 264,327 280,263 292,248 201,232 154,263",
+        "labelX":  202,
+        "labelY":  508,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "phare-droit-14",
+        "label":  "Phare (droit)",
+        "price":  60,
+        "profile":  "Camionette",
+        "view":  "top",
+        "points":  "193,234 154,238 138,246 99,313",
+        "labelX":  146,
+        "labelY":  258,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "phare-gauche-15",
+        "label":  "Phare (gauche)",
+        "price":  60,
+        "profile":  "Camionette",
+        "view":  "top",
+        "points":  "103,698 142,765 154,777 189,781 201,781",
+        "labelX":  158,
+        "labelY":  760,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "retroviseur-droit-16",
+        "label":  "Rétroviseur (droit)",
+        "price":  25,
+        "profile":  "Camionette",
+        "view":  "top",
+        "points":  "386,215 394,188 390,180 402,140 410,129 442,125 446,133 438,188 414,192 410,211 414,215",
+        "labelX":  413,
+        "labelY":  174,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "retroviseur-gauche-17",
+        "label":  "Rétroviseur (gauche)",
+        "price":  25,
+        "profile":  "Camionette",
+        "view":  "top",
+        "points":  "386,793 390,828 406,879 438,879 446,875 434,824 414,816 414,805 414,797",
+        "labelX":  416,
+        "labelY":  833,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "pare-chocs-avant-18",
+        "label":  "Pare-chocs (avant)",
+        "price":  120,
+        "profile":  "Camionette",
+        "view":  "top",
+        "points":  "95,319 79,422 75,552 79,603 95,686 146,769 197,785 174,789 126,765 91,698 79,663 71,521 75,390 79,355 103,288 138,233",
+        "labelX":  106,
+        "labelY":  552,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "aile-avant-droit-19",
+        "label":  "Aile (avant-droit)",
+        "price":  80,
+        "profile":  "Camionette",
+        "view":  "top",
+        "points":  "138,231 166,219 221,215 237,215 351,211 383,211 383,219 355,227 347,227 335,239 292,247 197,231",
+        "labelX":  284,
+        "labelY":  224,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "aile-avant-gauche-20",
+        "label":  "Aile (avant-gauche)",
+        "price":  80,
+        "profile":  "Camionette",
+        "view":  "top",
+        "points":  "174,790 201,778 268,778 292,766 315,774 335,770 327,782 335,793 343,793 379,793 383,801 296,801 225,797",
+        "labelX":  298,
+        "labelY":  786,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "porte-avant-droit-23",
+        "label":  "Porte (avant-droit)",
+        "price":  100,
+        "profile":  "Camionette",
+        "view":  "top",
+        "points":  "414,211 694,207 702,243 678,243 670,223 655,215 552,215 442,219 430,215",
+        "labelX":  582,
+        "labelY":  221,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "porte-avant-gauche-23",
+        "label":  "Porte (avant-gauche)",
+        "price":  100,
+        "profile":  "Camionette",
+        "view":  "top",
+        "points":  "414,799 414,795 430,791 635,795 659,791 666,787 682,767 670,764 698,760 698,799 588,803",
+        "labelX":  596,
+        "labelY":  786,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "toit-23",
+        "label":  "Toit",
+        "price":  130,
+        "profile":  "Camionette",
+        "view":  "top",
+        "points":  "489,734 473,639 461,505 469,383 485,276 576,280 623,284 958,280 1305,280 1317,379 1325,465 1325,556 1321,623 1313,683 1301,726",
+        "labelX":  916,
+        "labelY":  473,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "panneau-droit-25",
+        "label":  "Panneau (droit)",
+        "price":  300,
+        "profile":  "Camionette",
+        "view":  "top",
+        "points":  "698,245 698,209 994,209 1270,213 1270,249",
+        "labelX":  986,
+        "labelY":  225,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "panneau-gauche-26",
+        "label":  "Panneau (gauche)",
+        "price":  300,
+        "profile":  "Camionette",
+        "view":  "top",
+        "points":  "698,808 698,760 1266,760 1270,800",
+        "labelX":  983,
+        "labelY":  782,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "aile-arriere-droit-27",
+        "label":  "Aile (arrière-droit)",
+        "price":  80,
+        "profile":  "Camionette",
+        "view":  "top",
+        "points":  "1270,250 1270,211 1293,215 1309,222 1325,246 1309,234 1301,250",
+        "labelX":  1297,
+        "labelY":  233,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "aile-arriere-gauche-28",
+        "label":  "Aile (arrière-gauche)",
+        "price":  80,
+        "profile":  "Camionette",
+        "view":  "top",
+        "points":  "1270,799 1266,760 1297,764 1301,767 1325,767 1309,791",
+        "labelX":  1295,
+        "labelY":  775,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "porte-coffre-droit-29",
+        "label":  "Porte coffre (droit)",
+        "price":  100,
+        "profile":  "Camionette",
+        "view":  "top",
+        "points":  "1329,505 1368,509 1364,434 1357,343 1345,280 1333,268 1317,272 1309,288 1317,339 1325,410",
+        "labelX":  1336,
+        "labelY":  365,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "porte-coffre-gauche-30",
+        "label":  "Porte coffre (gauche)",
+        "price":  100,
+        "profile":  "Camionette",
+        "view":  "top",
+        "points":  "1333,506 1329,596 1317,683 1313,726 1325,742 1333,742 1349,730 1360,667 1364,584 1368,506",
+        "labelX":  1339,
+        "labelY":  648,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "montant-droit-29",
+        "label":  "Montant (droit)",
+        "price":  80,
+        "profile":  "Camionette",
+        "view":  "top",
+        "points":  "343,228 359,248 481,260 489,263 489,275 607,279 726,283 1309,283 1317,271 1325,267 1341,275 1329,252 741,248 682,248 552,252",
+        "labelX":  806,
+        "labelY":  262,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "montant-gauche-30",
+        "label":  "Montant (gauche)",
+        "price":  80,
+        "profile":  "Camionette",
+        "view":  "top",
+        "points":  "327,790 331,775 450,759 485,747 485,739 659,731 899,727 1309,723 1329,743 1341,747 1325,767 1266,763 1084,767 804,763 698,763 564,760",
+        "labelX":  835,
+        "labelY":  754,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "porte-coffre-droit-31",
+        "label":  "Porte coffre (droit)",
+        "price":  100,
+        "profile":  "Camionette",
+        "view":  "rear",
+        "points":  "733,101 950,105 1033,121 1069,346 1073,685 1065,733 1037,745 737,745",
+        "labelX":  962,
+        "labelY":  448,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "porte-coffre-gauche-32",
+        "label":  "Porte coffre (gauche)",
+        "price":  100,
+        "profile":  "Camionette",
+        "view":  "rear",
+        "points":  "733,102 453,114 414,122 383,291 375,374 375,599 375,697 386,737 422,749 730,745",
+        "labelX":  465,
+        "labelY":  453,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "retroviseur-droit-33",
+        "label":  "Rétroviseur (droit)",
+        "price":  25,
+        "profile":  "Camionette",
+        "view":  "rear",
+        "points":  "1120,399 1132,395 1144,332 1151,328 1199,328 1207,348 1215,423 1203,439 1151,446 1140,439 1132,439",
+        "labelX":  1163,
+        "labelY":  392,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "retroviseur-gauche-34",
+        "label":  "Rétroviseur (gauche)",
+        "price":  25,
+        "profile":  "Camionette",
+        "view":  "rear",
+        "points":  "323,399 315,395 312,344 304,332 256,332 241,344 237,419 248,439 296,443 312,439 319,439",
+        "labelX":  288,
+        "labelY":  393,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "toit-35",
+        "label":  "Toit",
+        "price":  130,
+        "profile":  "Camionette",
+        "view":  "rear",
+        "points":  "414,114 422,110 497,102 706,90 848,94 1029,106 1029,114 942,106 801,102 647,102 564,102",
+        "labelX":  718,
+        "labelY":  104,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "montant-droit-36",
+        "label":  "Montant (droit)",
+        "price":  80,
+        "profile":  "Camionette",
+        "view":  "rear",
+        "points":  "1069,343 1053,221 1029,107 1053,114 1100,347",
+        "labelX":  1061,
+        "labelY":  226,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "montant-gauche-37",
+        "label":  "Montant (gauche)",
+        "price":  80,
+        "profile":  "Camionette",
+        "view":  "rear",
+        "points":  "339,340 379,344 394,222 414,115 383,138",
+        "labelX":  382,
+        "labelY":  232,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "panneau-droit-40",
+        "label":  "Panneau (droit)",
+        "price":  300,
+        "profile":  "Camionette",
+        "view":  "right",
+        "points":  "765,730 367,734 367,698 359,670 335,639 300,615 244,603 189,619 166,651 99,647 118,288 118,276 130,272 765,272",
+        "labelX":  309,
+        "labelY":  551,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "porte-coffre-droit-41",
+        "label":  "Porte coffre (droit)",
+        "price":  100,
+        "profile":  "Camionette",
+        "view":  "right",
+        "points":  "83,263 99,267 103,298 87,357 75,460 67,586 71,645 55,677 43,677 43,586 47,456 51,401 87,290",
+        "labelX":  70,
+        "labelY":  459,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "montant-droit-42",
+        "label":  "Montant (droit)",
+        "price":  80,
+        "profile":  "Camionette",
+        "view":  "right",
+        "points":  "71,461 106,461 122,275 765,275 911,287 950,291 990,315 1116,421 1124,413 1029,327 978,287 946,275 919,267 816,256 126,256 103,267 110,267",
+        "labelX":  658,
+        "labelY":  318,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "capot-43",
+        "label":  "Capot",
+        "price":  100,
+        "profile":  "Camionette",
+        "view":  "right",
+        "points":  "1187,448 1218,456 1218,452 1345,491 1360,499 1372,523 1357,519 1262,487 1262,491 1203,472",
+        "labelX":  1278,
+        "labelY":  484,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "aile-avant-droit-44",
+        "label":  "Aile (avant-droit)",
+        "price":  80,
+        "profile":  "Camionette",
+        "view":  "right",
+        "points":  "1124,415 1112,423 1124,443 1112,462 1092,474 1092,529 1077,608 1065,667 1053,734 1073,742 1077,691 1092,652 1136,616 1187,604 1234,620 1266,644 1286,687 1297,754 1412,730 1416,726 1345,703 1329,612 1388,624 1396,663 1412,663 1408,628 1384,620 1388,592 1376,565 1345,561 1266,537 1246,502 1266,494 1199,474 1183,454 1151,446",
+        "labelX":  1234,
+        "labelY":  593,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "pare-chocs-arriere-45",
+        "label":  "Pare-chocs (arrière)",
+        "price":  120,
+        "profile":  "Camionette",
+        "view":  "right",
+        "points":  "162,649 154,669 146,696 142,736 71,736 32,728 24,708 28,685 51,685 59,673 87,669 103,645",
+        "labelX":  88,
+        "labelY":  690,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "pare-chocs-arriere-46",
+        "label":  "Pare-chocs (arrière)",
+        "price":  120,
+        "profile":  "Camionette",
+        "view":  "left",
+        "points":  "1329,593 1357,593 1360,644 1372,668 1396,688 1404,688 1408,708 1400,731 1289,739 1286,711 1278,668 1270,656 1329,652",
+        "labelX":  1344,
+        "labelY":  672,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "aile-avant-gauche-47",
+        "label":  "Aile (avant-gauche)",
+        "price":  80,
+        "profile":  "Camionette",
+        "view":  "left",
+        "points":  "379,657 386,700 390,744 375,748 367,696 347,649 308,618 260,606 205,618 174,649 158,696 154,728 150,756 51,740 39,732 35,724 103,708 118,622 106,618 59,629 51,669 43,673 43,637 55,594 79,574 79,562 83,566 177,542 197,510 189,499 237,483 252,475 268,455 292,447 315,424 339,439 339,447 359,475 355,526 355,554",
+        "labelX":  207,
+        "labelY":  605,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "capot-48",
+        "label":  "Capot",
+        "price":  100,
+        "profile":  "Camionette",
+        "view":  "left",
+        "points":  "75,525 99,525 166,502 181,498 237,478 260,454 213,462 126,490 95,502",
+        "labelX":  161,
+        "labelY":  493,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "porte-coffre-gauche-50",
+        "label":  "Porte coffre (gauche)",
+        "price":  100,
+        "profile":  "Camionette",
+        "view":  "left",
+        "points":  "1349,264 1337,272 1333,319 1341,394 1357,469 1360,592 1360,643 1392,686 1392,540 1388,458 1384,407 1345,293",
+        "labelX":  1362,
+        "labelY":  445,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "panneau-gauche-51",
+        "label":  "Panneau (gauche)",
+        "price":  300,
+        "profile":  "Camionette",
+        "view":  "left",
+        "points":  "678,279 1305,279 1325,465 1333,650 1266,654 1222,618 1179,606 1140,614 1104,637 1069,685 1065,736 674,736",
+        "labelX":  1113,
+        "labelY":  580,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "porte-avant-gauche-52",
+        "label":  "Porte (avant-gauche)",
+        "price":  100,
+        "profile":  "Camionette",
+        "view":  "left",
+        "points":  "674,281 670,549 670,734 390,742 379,655 355,545 355,462 383,482 599,470 639,431 651,308 647,301 509,308 465,324 418,364 343,439 331,427 434,340 465,312 485,301",
+        "labelX":  493,
+        "labelY":  439,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "pare-chocs-arriere-52",
+        "label":  "Pare-chocs (arrière)",
+        "price":  120,
+        "profile":  "Camionette",
+        "view":  "rear",
+        "points":  "371,631 375,686 375,710 386,737 418,749 1021,741 1061,734 1073,682 1073,631 1124,627 1124,682 1148,686 1140,749 1124,816 1120,840 1006,840 978,840 450,836 442,840 347,840 327,828 300,694 323,686 319,631",
+        "labelX":  726,
+        "labelY":  739,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "montant-gauche-52",
+        "label":  "Montant (gauche)",
+        "price":  80,
+        "profile":  "Camionette",
+        "view":  "left",
+        "points":  "315,418 371,375 442,319 477,292 548,272 678,268 911,256 1175,256 1309,260 1329,268 1353,461 1325,465 1305,276 1104,276 962,276 678,276 580,276 521,284 469,308 331,428",
+        "labelX":  809,
+        "labelY":  316,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "porte-avant-droit-52",
+        "label":  "Porte (avant-droit)",
+        "price":  100,
+        "profile":  "Camionette",
+        "view":  "right",
+        "points":  "765,275 765,476 781,740 1053,744 1061,665 1088,551 1088,476 1088,468 1073,472 840,460 808,440 804,436 797,294 808,286 840,290 899,294 946,306 994,330 1037,365 1077,405 1100,428 1104,448 1104,460 1116,452 1069,381 998,318 958,298",
+        "labelX":  965,
+        "labelY":  428,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "phare-droit-53",
+        "label":  "Phare (droit)",
+        "price":  60,
+        "profile":  "Camionette",
+        "view":  "right",
+        "points":  "1266,536 1246,500 1266,488 1349,508 1368,547 1364,555",
+        "labelX":  1310,
+        "labelY":  522,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "retroviseur-droit-54",
+        "label":  "Rétroviseur (droit)",
+        "price":  25,
+        "profile":  "Camionette",
+        "view":  "right",
+        "points":  "1065,436 1057,401 1053,401 1025,393 1021,397 1013,448 1017,456 1057,464 1080,456",
+        "labelX":  1043,
+        "labelY":  428,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "retroviseur-gauche-55",
+        "label":  "Rétroviseur (gauche)",
+        "price":  25,
+        "profile":  "Camionette",
+        "view":  "left",
+        "points":  "359,449 363,457 367,465 375,472 386,472 426,465 426,457 438,413 426,398 394,402 383,449",
+        "labelX":  395,
+        "labelY":  445,
+        "exclusions":  [
+
+                       ]
+    },
+    {
+        "id":  "phare-gauche-56",
+        "label":  "Phare (gauche)",
+        "price":  60,
+        "profile":  "Camionette",
+        "view":  "left",
+        "points":  "99,522 79,554 87,562 170,542 193,510 166,495",
+        "labelX":  132,
+        "labelY":  531,
+        "exclusions":  [
+
+                       ]
+    }
+]

@@ -60,9 +60,12 @@ class AppScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     final isMobile = Responsive.isMobile(context);
     final colors = ClcThemeColors.of(context);
+    final pageColor = colors.isLight && currentPath == '/subscriptions'
+        ? const Color(0xFFFAFBFE)
+        : colors.bg;
 
     return Scaffold(
-      backgroundColor: colors.bg,
+      backgroundColor: pageColor,
       body: SafeArea(
         maintainBottomViewPadding: true,
         child: Row(
@@ -73,7 +76,7 @@ class AppScaffold extends StatelessWidget {
                 padding: EdgeInsets.zero,
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 180),
-                  decoration: BoxDecoration(color: colors.bg),
+                  decoration: BoxDecoration(color: pageColor),
                   child: Padding(
                     padding: EdgeInsets.all(Responsive.pagePadding(context)),
                     child: child,

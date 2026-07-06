@@ -1,7 +1,6 @@
-import 'dart:typed_data';
+import 'dart:convert';
 
 import 'package:car_luxe_cleaning_flutter/app/theme.dart';
-import 'package:car_luxe_cleaning_flutter/core/utils/date_money_formatters.dart';
 import 'package:car_luxe_cleaning_flutter/core/widgets/app_button.dart';
 import 'package:car_luxe_cleaning_flutter/core/widgets/app_card.dart';
 import 'package:car_luxe_cleaning_flutter/features/basket/data/service_catalog.dart';
@@ -13,8 +12,28 @@ import 'package:car_luxe_cleaning_flutter/shared/models/client.dart';
 import 'package:car_luxe_cleaning_flutter/shared/models/vehicle.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:printing/printing.dart';
+
+const _basketLightPrestation = Color(0xFFE2E8F0);
+const _basketLightPrestationBorder = Color(0xFFD8DEE8);
+const _basketDarkChoice = Color(0xFF111827);
+const _basketAccent = Color(0xFFAFF700);
+
+String _basketEuro(num value) {
+  final rounded = value.round().abs().toString();
+  final buffer = StringBuffer();
+  for (var index = 0; index < rounded.length; index += 1) {
+    final remaining = rounded.length - index;
+    buffer.write(rounded[index]);
+    if (remaining > 1 && remaining % 3 == 1) buffer.write(' ');
+  }
+  final sign = value < 0 ? '-' : '';
+  return '$sign€${buffer.toString()}';
+}
+
+String _basketEuroPlus(num value) => '+${_basketEuro(value)}';
 
 class BasketComposerPage extends ConsumerStatefulWidget {
   const BasketComposerPage({super.key});
@@ -28,8 +47,17 @@ class _BasketComposerPageState extends ConsumerState<BasketComposerPage> {
 
   int _step = 1;
   CatalogVehicleSize _size = CatalogVehicleSize.s;
-  String _categoryId = officialServiceCategories.first.id;
-  final Map<String, int> _selected = {};
+  String _categoryId = 'interior';
+  String _chosenPack = 'serenite';
+  String _exteriorChoice = 'lavage';
+  String _polishType = 'integral';
+  final Set<String> _selectedInteriorExtras = {};
+  final Set<String> _selectedExteriorExtras = {};
+  final Set<String> _selectedShampooExtras = {};
+  final Map<String, int> _customExteriorPrices = {};
+  final List<_PolishingPart> _selectedPolishingParts = [];
+  bool _selectedPickup = false;
+  bool _selectedCourtesyCar = false;
 
   bool _applyVat = false;
   bool _includePackDetails = true;
@@ -98,25 +126,159 @@ class _BasketComposerPageState extends ConsumerState<BasketComposerPage> {
     super.dispose();
   }
 
-  ServiceCategory get _activeCategory => officialServiceCategories.firstWhere(
-    (category) => category.id == _categoryId,
-  );
-
   List<_BasketLine> get _lines {
     final lines = <_BasketLine>[];
-    for (final category in officialServiceCategories) {
-      for (final service in category.services) {
-        final quantity = _selected[service.id] ?? 0;
-        if (quantity <= 0) continue;
+    final sizeLabel = _vehicleSizeCode(_size);
+    if (_categoryId == 'interior') {
+      if (_chosenPack == 'serenite') {
         lines.add(
           _BasketLine(
-            category: category,
-            service: service,
-            quantity: quantity,
-            unitPrice: service.price.resolve(_size),
+            categoryLabel: 'Intérieur',
+            serviceLabel: 'Pack Sérénité - Intérieur • Taille [$sizeLabel]',
+            quantity: 1,
+            unitPrice: _packPrice('serenite'),
+          ),
+        );
+      } else if (_chosenPack == 'purete') {
+        lines.add(
+          _BasketLine(
+            categoryLabel: 'Intérieur',
+            serviceLabel:
+                'Pack Pureté Complet - Intérieur • Taille [$sizeLabel]',
+            quantity: 1,
+            unitPrice: _packPrice('purete'),
+          ),
+        );
+        for (final option in interiorExtraOptions) {
+          lines.add(
+            _BasketLine(
+              categoryLabel: 'Inclus',
+              serviceLabel: 'Inclus : ${option.name} [$sizeLabel]',
+              quantity: 1,
+              unitPrice: 0,
+            ),
+          );
+        }
+      } else {
+        lines.add(
+          _BasketLine(
+            categoryLabel: 'Intérieur',
+            serviceLabel:
+                'Composition personnalisée - Intérieur • Taille [$sizeLabel]',
+            quantity: 1,
+            unitPrice: 0,
           ),
         );
       }
+
+      if (_chosenPack == 'serenite' || _chosenPack == 'composition') {
+        for (final option in interiorExtraOptions) {
+          if (!_selectedInteriorExtras.contains(option.id)) continue;
+          lines.add(
+            _BasketLine(
+              categoryLabel: _chosenPack == 'composition'
+                  ? 'Élément intérieur'
+                  : 'Option intérieure',
+              serviceLabel: '${option.name} [$sizeLabel]',
+              quantity: 1,
+              unitPrice: option.priceFor(_size),
+            ),
+          );
+        }
+      }
+    } else {
+      if (_exteriorChoice == 'polissage' && _polishType == 'partiel') {
+        if (_selectedPolishingParts.isEmpty) {
+          lines.add(
+            _BasketLine(
+              categoryLabel: 'Polissage partiel',
+              serviceLabel:
+                  'Diagnostic polissage partiel personnalisé • Taille [$sizeLabel]',
+              quantity: 1,
+              unitPrice: 0,
+            ),
+          );
+        } else {
+          lines.add(
+            _BasketLine(
+              categoryLabel: 'Polissage partiel',
+              serviceLabel:
+                  'Diagnostic polissage partiel • Taille [$sizeLabel]',
+              quantity: 1,
+              unitPrice: 0,
+            ),
+          );
+          for (final part in _selectedPolishingParts) {
+            lines.add(
+              _BasketLine(
+                categoryLabel: 'Élément à polir',
+                serviceLabel: part.label,
+                quantity: 1,
+                unitPrice: part.price,
+              ),
+            );
+          }
+        }
+      } else {
+        lines.add(
+          _BasketLine(
+            categoryLabel: 'Extérieur',
+            serviceLabel:
+                '${_selectedPackLabel()} - Extérieur • Taille [$sizeLabel]',
+            quantity: 1,
+            unitPrice: _packPrice(_chosenPack),
+          ),
+        );
+
+        for (final option in exteriorSuggestionOptions) {
+          if (!_selectedExteriorExtras.contains(option.id)) continue;
+          lines.add(
+            _BasketLine(
+              categoryLabel: 'Option extérieure',
+              serviceLabel: option.name,
+              quantity: 1,
+              unitPrice: option.priceFor(
+                size: _size,
+                pack: _chosenPack,
+                customPrice: _customExteriorPrices[option.id],
+              ),
+            ),
+          );
+        }
+      }
+
+      for (final option in interiorExtraOptions) {
+        if (!_selectedShampooExtras.contains(option.id)) continue;
+        lines.add(
+          _BasketLine(
+            categoryLabel: 'Shampooing intérieur optionnel',
+            serviceLabel: '${option.name} [$sizeLabel]',
+            quantity: 1,
+            unitPrice: option.priceFor(_size),
+          ),
+        );
+      }
+    }
+
+    if (_selectedPickup) {
+      lines.add(
+        const _BasketLine(
+          categoryLabel: 'Service pickup',
+          serviceLabel: 'Pickup aller-retour',
+          quantity: 1,
+          unitPrice: 50,
+        ),
+      );
+    }
+    if (_selectedCourtesyCar) {
+      lines.add(
+        const _BasketLine(
+          categoryLabel: 'Mobilité',
+          serviceLabel: 'Voiture de courtoisie',
+          quantity: 1,
+          unitPrice: 50,
+        ),
+      );
     }
     return lines;
   }
@@ -195,14 +357,29 @@ class _BasketComposerPageState extends ConsumerState<BasketComposerPage> {
     });
   }
 
-  void _setQuantity(String id, int quantity) {
-    setState(() {
-      if (quantity <= 0) {
-        _selected.remove(id);
-      } else {
-        _selected[id] = quantity;
-      }
-    });
+  void _toggleSet(Set<String> values, String id) {
+    if (values.contains(id)) {
+      values.remove(id);
+    } else {
+      values.add(id);
+    }
+  }
+
+  int _packPrice(String pack) => packPrices[pack]?.priceFor(_size) ?? 0;
+
+  String _selectedPackLabel() {
+    return switch (_chosenPack) {
+      'serenite' => 'Pack Sérénité',
+      'purete' => 'Pack Pureté',
+      'composition' => 'Composition personnalisée',
+      'splendeur' => 'Pack Splendeur',
+      'medium' => 'Polissage Moyen',
+      'approfondi' => 'Polissage Approfondi',
+      'brillance' => 'Pack Brillance',
+      'renaissance' => 'Pack Renaissance',
+      'signature' => 'Pack Signature',
+      _ => 'Pack',
+    };
   }
 
   void _refreshStepState() {
@@ -382,7 +559,7 @@ class _BasketComposerPageState extends ConsumerState<BasketComposerPage> {
             items: [
               for (final line in _lines)
                 DocumentLineItem(
-                  description: line.service.label,
+                  description: line.serviceLabel,
                   quantity: line.quantity,
                   unitPrice: line.unitPrice,
                   vatRate: _applyVat ? 21 : 0,
@@ -450,8 +627,6 @@ class _BasketComposerPageState extends ConsumerState<BasketComposerPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const _BasketPageHeader(),
-              const SizedBox(height: 22),
-              _BasketProgress(step: _step),
               const SizedBox(height: 18),
               AnimatedSwitcher(
                 duration: const Duration(milliseconds: 220),
@@ -461,37 +636,95 @@ class _BasketComposerPageState extends ConsumerState<BasketComposerPage> {
                   key: ValueKey(_step),
                   child: switch (_step) {
                     1 => _CategoryOpenStep(
-                      activeCategoryId: _categoryId,
                       onSelect: (id) {
                         setState(() {
                           _categoryId = id;
+                          if (id == 'exterior') {
+                            _exteriorChoice = 'lavage';
+                            _polishType = 'integral';
+                            _chosenPack = 'splendeur';
+                          } else {
+                            _chosenPack = 'serenite';
+                          }
                           _step = 2;
                         });
                         _scrollToTop();
                       },
                     ),
-                    2 => _StepPanel(
-                      accentLabel: 'Etape 2 / $_steps',
-                      title: 'Gabarit du Vehicule',
-                      subtitle:
-                          'Selectionnez le format adapte a votre vehicule.',
-                      centerHeader: true,
-                      child: _SizeSelector(
-                        value: _size,
-                        onChanged: (value) => setState(() => _size = value),
-                      ),
+                    2 => _VehicleSizeAndTypeStep(
+                      size: _size,
+                      categoryId: _categoryId,
+                      exteriorChoice: _exteriorChoice,
+                      polishType: _polishType,
+                      onSizeChanged: (value) => setState(() => _size = value),
+                      onExteriorChoiceChanged: (value) => setState(() {
+                        _exteriorChoice = value;
+                        if (value == 'lavage') {
+                          _polishType = 'integral';
+                          _chosenPack = 'splendeur';
+                        } else {
+                          _polishType = 'integral';
+                          _chosenPack = 'medium';
+                        }
+                      }),
+                      onPolishTypeChanged: (value) => setState(() {
+                        _polishType = value;
+                        _chosenPack = value == 'partiel' ? 'medium' : 'medium';
+                      }),
                     ),
                     3 => _ServicesComposerStep(
                       categoryId: _categoryId,
-                      activeCategory: _activeCategory,
                       size: _size,
-                      selected: _selected,
+                      chosenPack: _chosenPack,
+                      exteriorChoice: _exteriorChoice,
+                      polishType: _polishType,
+                      selectedInteriorExtras: _selectedInteriorExtras,
+                      selectedExteriorExtras: _selectedExteriorExtras,
+                      selectedShampooExtras: _selectedShampooExtras,
+                      customExteriorPrices: _customExteriorPrices,
+                      selectedPolishingParts: _selectedPolishingParts,
+                      selectedPickup: _selectedPickup,
+                      selectedCourtesyCar: _selectedCourtesyCar,
                       lines: _lines,
                       totalHtva: _totalHtva,
                       applyVat: _applyVat,
-                      onCategoryChanged: (id) =>
-                          setState(() => _categoryId = id),
-                      onQuantityChanged: _setQuantity,
+                      onPackChanged: (value) =>
+                          setState(() => _chosenPack = value),
+                      onInteriorExtraToggled: (id) => setState(
+                        () => _toggleSet(_selectedInteriorExtras, id),
+                      ),
+                      onExteriorExtraToggled: (id) => setState(() {
+                        final option = exteriorSuggestionOptions.firstWhere(
+                          (item) => item.id == id,
+                        );
+                        if (option.isCeramicChoice) {
+                          for (final item in exteriorSuggestionOptions) {
+                            if (item.isCeramicChoice && item.id != id) {
+                              _selectedExteriorExtras.remove(item.id);
+                            }
+                          }
+                        }
+                        _toggleSet(_selectedExteriorExtras, id);
+                      }),
+                      onShampooExtraToggled: (id) => setState(
+                        () => _toggleSet(_selectedShampooExtras, id),
+                      ),
+                      onCustomExteriorPriceChanged: (id, value) => setState(() {
+                        if (value <= 0) {
+                          _customExteriorPrices.remove(id);
+                        } else {
+                          _customExteriorPrices[id] = value;
+                        }
+                      }),
+                      onPolishingPartsChanged: (parts) => setState(() {
+                        _selectedPolishingParts
+                          ..clear()
+                          ..addAll(parts);
+                      }),
+                      onPickupChanged: (value) =>
+                          setState(() => _selectedPickup = value),
+                      onCourtesyCarChanged: (value) =>
+                          setState(() => _selectedCourtesyCar = value),
                     ),
                     4 => _ClientVehicleStep(
                       loading: _loadingClients,
@@ -543,7 +776,9 @@ class _BasketComposerPageState extends ConsumerState<BasketComposerPage> {
                     _ => _FinalSynthesisStep(
                       lines: _lines,
                       size: _size,
-                      activeCategory: _activeCategory,
+                      activeCategoryLabel: _categoryId == 'interior'
+                          ? 'Intérieur'
+                          : 'Extérieur',
                       selectedClient: _selectedClient,
                       selectedVehicle: _selectedVehicle,
                       totalHtva: _totalHtva,
@@ -569,7 +804,7 @@ class _BasketComposerPageState extends ConsumerState<BasketComposerPage> {
                   },
                 ),
               ),
-              if (_step < _steps) ...[
+              if (_step > 1 && _step < _steps) ...[
                 const SizedBox(height: 18),
                 _BasketStepActions(
                   step: _step,
@@ -589,21 +824,1397 @@ class _BasketComposerPageState extends ConsumerState<BasketComposerPage> {
   }
 }
 
+class _InteriorPackSelector extends StatelessWidget {
+  const _InteriorPackSelector({
+    required this.chosenPack,
+    required this.size,
+    required this.onChanged,
+  });
+
+  final String chosenPack;
+  final CatalogVehicleSize size;
+  final ValueChanged<String> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final columns = constraints.maxWidth < 760 ? 1 : 3;
+        final width = (constraints.maxWidth - ((columns - 1) * 14)) / columns;
+        final cards = [
+          _PackCardData(
+            id: 'serenite',
+            title: 'Pack Sérénité',
+            subtitle: 'Pour un entretien régulier',
+            priceLabel: _basketEuro(packPrices['serenite']!.priceFor(size)),
+          ),
+          _PackCardData(
+            id: 'purete',
+            title: 'Pack Pureté',
+            subtitle: 'Remise à neuf',
+            priceLabel: _basketEuro(packPrices['purete']!.priceFor(size)),
+            recommended: true,
+          ),
+          const _PackCardData(
+            id: 'composition',
+            title: 'Composition personnalisée',
+            subtitle: 'Choix par élément',
+            priceLabel: 'À la carte',
+          ),
+        ];
+        return Wrap(
+          spacing: 14,
+          runSpacing: 14,
+          children: [
+            for (final card in cards)
+              SizedBox(
+                width: width,
+                child: _PackChoiceCard(
+                  data: card,
+                  selected: chosenPack == card.id,
+                  onTap: () => onChanged(card.id),
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _ExteriorLavageSelector extends StatelessWidget {
+  const _ExteriorLavageSelector({
+    required this.chosenPack,
+    required this.size,
+    required this.onChanged,
+  });
+
+  final String chosenPack;
+  final CatalogVehicleSize size;
+  final ValueChanged<String> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return _PackChoiceCard(
+      data: _PackCardData(
+        id: 'splendeur',
+        title: 'Pack Splendeur',
+        subtitle: 'Lavage extérieur premium',
+        priceLabel: _basketEuro(packPrices['splendeur']!.priceFor(size)),
+        recommended: true,
+      ),
+      selected: chosenPack == 'splendeur',
+      onTap: () => onChanged('splendeur'),
+    );
+  }
+}
+
+class _PolishingIntegralSelector extends StatelessWidget {
+  const _PolishingIntegralSelector({
+    required this.chosenPack,
+    required this.size,
+    required this.onChanged,
+  });
+
+  final String chosenPack;
+  final CatalogVehicleSize size;
+  final ValueChanged<String> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final columns = constraints.maxWidth < 760 ? 1 : 2;
+        final width = (constraints.maxWidth - ((columns - 1) * 14)) / columns;
+        final cards = [
+          _PackCardData(
+            id: 'medium',
+            title: 'Polissage Moyen',
+            subtitle: 'Correction standard',
+            priceLabel: _basketEuro(packPrices['medium']!.priceFor(size)),
+            description:
+                'Idéal pour micro-rayures légères, voile terne et remise en brillance propre.',
+          ),
+          _PackCardData(
+            id: 'approfondi',
+            title: 'Polissage Approfondi',
+            subtitle: 'Correction avancée',
+            priceLabel: _basketEuro(packPrices['approfondi']!.priceFor(size)),
+            description:
+                'Pour défauts plus marqués, correction plus complète et finition plus poussée.',
+            recommended: true,
+          ),
+        ];
+        return Wrap(
+          spacing: 14,
+          runSpacing: 14,
+          children: [
+            for (final card in cards)
+              SizedBox(
+                width: width,
+                child: _PackChoiceCard(
+                  data: card,
+                  selected: chosenPack == card.id,
+                  onTap: () => onChanged(card.id),
+                ),
+              ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _PackCardData {
+  const _PackCardData({
+    required this.id,
+    required this.title,
+    required this.subtitle,
+    required this.priceLabel,
+    this.description,
+    this.recommended = false,
+  });
+
+  final String id;
+  final String title;
+  final String subtitle;
+  final String priceLabel;
+  final String? description;
+  final bool recommended;
+}
+
+class _PackChoiceCard extends StatelessWidget {
+  const _PackChoiceCard({
+    required this.data,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final _PackCardData data;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+    final selectedBackground = colors.isLight
+        ? const Color(0xFFF0F1F3)
+        : colors.focus.withValues(alpha: 0.10);
+    final idleBackground = colors.isLight
+        ? Colors.white
+        : colors.surfaceRaised.withValues(alpha: 0.18);
+    final selectedBorder = colors.isLight ? colors.borderStrong : colors.focus;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(2),
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          constraints: const BoxConstraints(minHeight: 155),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: selected ? selectedBackground : idleBackground,
+            borderRadius: BorderRadius.circular(2),
+            border: Border.all(
+              color: selected ? selectedBorder : colors.border,
+              width: selected && colors.isLight ? 1.6 : 1,
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        if (selected) _SmallBadge(label: 'Sélectionné'),
+                        if (!selected) const SizedBox(height: 28),
+                        const SizedBox(height: 8),
+                        Text(
+                          data.title.toUpperCase(),
+                          style: TextStyle(
+                            color: colors.textStrong,
+                            fontSize: 16,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0.9,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          data.subtitle,
+                          style: TextStyle(
+                            color: colors.muted,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                            fontStyle: FontStyle.italic,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (data.recommended)
+                    const _RecommendedBadge()
+                  else
+                    _SelectionDot(selected: selected),
+                ],
+              ),
+              if (data.description != null) ...[
+                const SizedBox(height: 12),
+                Text(
+                  data.description!,
+                  style: TextStyle(
+                    color: colors.muted,
+                    fontSize: 12,
+                    height: 1.35,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+              const SizedBox(height: 14),
+              Divider(color: colors.border),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      data.priceLabel == 'À la carte'
+                          ? 'BASE :'
+                          : 'TARIF FORMAT :',
+                      style: TextStyle(
+                        color: colors.muted,
+                        fontSize: 10,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1.1,
+                      ),
+                    ),
+                  ),
+                  Text(
+                    data.priceLabel,
+                    style: TextStyle(
+                      color: colors.focus,
+                      fontSize: 20,
+                      fontWeight: FontWeight.w900,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _RecommendedBadge extends StatelessWidget {
+  const _RecommendedBadge();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 6),
+      decoration: BoxDecoration(
+        color: const Color(0x1FCA8A04),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: const Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.star_rounded, size: 13, color: Color(0xFFCA8A04)),
+          SizedBox(width: 4),
+          Text(
+            'RECOMMANDÉ',
+            style: TextStyle(
+              color: Color(0xFFCA8A04),
+              fontSize: 9,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 0.8,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _InteriorComparisonTable extends StatelessWidget {
+  const _InteriorComparisonTable({
+    required this.chosenPack,
+    required this.size,
+  });
+
+  final String chosenPack;
+  final CatalogVehicleSize size;
+
+  @override
+  Widget build(BuildContext context) {
+    final rows = [
+      _ComparisonRowData(
+        text: 'Tarif format sélectionné',
+        values: {
+          'Sérénité': _basketEuro(packPrices['serenite']!.priceFor(size)),
+          'Pureté': _basketEuro(packPrices['purete']!.priceFor(size)),
+        },
+      ),
+      const _ComparisonRowData(
+        text: 'Usage conseillé',
+        values: {'Sérénité': 'Entretien régulier', 'Pureté': 'Remise à neuf'},
+      ),
+      const _ComparisonRowData(
+        text: 'Lavage intérieur premium',
+        values: {'Sérénité': true, 'Pureté': true},
+      ),
+      const _ComparisonRowData(
+        text: 'Shampoing des textiles et zones intérieures',
+        values: {'Sérénité': 'Options', 'Pureté': true},
+      ),
+      const _ComparisonRowData(
+        text: 'Traitement et soin des cuirs',
+        values: {'Sérénité': 'Option', 'Pureté': true},
+      ),
+      const _ComparisonRowData(
+        text: 'Reconditionnement complet habitacle',
+        values: {'Sérénité': false, 'Pureté': true},
+      ),
+    ];
+    return _ComparisonTable(
+      eyebrow: 'Comparatif intérieur',
+      note: "Choisis selon le niveau d'intervention attendu.",
+      columns: const ['Sérénité', 'Pureté'],
+      activeColumn: chosenPack == 'purete' ? 'Pureté' : 'Sérénité',
+      rows: rows,
+    );
+  }
+}
+
+class _ExteriorComparisonTable extends StatelessWidget {
+  const _ExteriorComparisonTable({
+    required this.chosenPack,
+    required this.size,
+    required this.showSplendeur,
+  });
+
+  final String chosenPack;
+  final CatalogVehicleSize size;
+  final bool showSplendeur;
+
+  @override
+  Widget build(BuildContext context) {
+    final columns = showSplendeur
+        ? const ['Splendeur', 'Moyen', 'Approfondi']
+        : const ['Moyen', 'Approfondi'];
+    final rows = [
+      _ComparisonRowData(
+        text: 'Tarif format sélectionné',
+        values: {
+          if (showSplendeur)
+            'Splendeur': _basketEuro(packPrices['splendeur']!.priceFor(size)),
+          'Moyen': _basketEuro(packPrices['medium']!.priceFor(size)),
+          'Approfondi': _basketEuro(packPrices['approfondi']!.priceFor(size)),
+        },
+      ),
+      for (final item in exteriorComparativeItems)
+        _ComparisonRowData(
+          text: item.text,
+          values: {
+            if (showSplendeur) 'Splendeur': item.splendeur,
+            'Moyen': item.medium,
+            'Approfondi': item.approfondi,
+          },
+        ),
+    ];
+    final activeColumn = switch (chosenPack) {
+      'splendeur' => 'Splendeur',
+      'approfondi' => 'Approfondi',
+      _ => 'Moyen',
+    };
+    return _ComparisonTable(
+      eyebrow: showSplendeur ? 'Comparatif extérieur' : 'Comparatif polissage',
+      note: 'Visualise clairement ce qui est inclus dans chaque niveau.',
+      columns: columns,
+      activeColumn: activeColumn,
+      rows: rows,
+    );
+  }
+}
+
+class _ComparisonRowData {
+  const _ComparisonRowData({required this.text, required this.values});
+
+  final String text;
+  final Map<String, Object> values;
+}
+
+class _ComparisonTable extends StatelessWidget {
+  const _ComparisonTable({
+    required this.eyebrow,
+    required this.note,
+    required this.columns,
+    required this.activeColumn,
+    required this.rows,
+  });
+
+  final String eyebrow;
+  final String note;
+  final List<String> columns;
+  final String activeColumn;
+  final List<_ComparisonRowData> rows;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: colors.isLight
+            ? Colors.white
+            : colors.shell.withValues(alpha: 0.40),
+        borderRadius: BorderRadius.circular(2),
+        border: Border.all(color: colors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            eyebrow.toUpperCase(),
+            style: TextStyle(
+              color: colors.focus,
+              fontSize: 10,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 2.8,
+            ),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            note,
+            style: TextStyle(
+              color: colors.muted,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 14),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(2),
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(minWidth: 620),
+                child: Table(
+                  defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                  columnWidths: {
+                    0: const FlexColumnWidth(1.6),
+                    for (var i = 0; i < columns.length; i += 1)
+                      i + 1: const FlexColumnWidth(0.82),
+                  },
+                  border: TableBorder.all(color: colors.border),
+                  children: [
+                    TableRow(
+                      decoration: BoxDecoration(
+                        color: colors.surfaceRaised.withValues(
+                          alpha: colors.isLight ? 1 : 0.25,
+                        ),
+                      ),
+                      children: [
+                        _ComparisonCell(
+                          text: 'Comparaison',
+                          header: true,
+                          muted: true,
+                        ),
+                        for (final column in columns)
+                          _ComparisonCell(
+                            text: column,
+                            header: true,
+                            active: column == activeColumn,
+                            center: true,
+                          ),
+                      ],
+                    ),
+                    for (final row in rows)
+                      TableRow(
+                        children: [
+                          _ComparisonCell(text: row.text),
+                          for (final column in columns)
+                            _ComparisonValueCell(
+                              value: row.values[column] ?? false,
+                              active: column == activeColumn,
+                            ),
+                        ],
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ComparisonCell extends StatelessWidget {
+  const _ComparisonCell({
+    required this.text,
+    this.header = false,
+    this.active = false,
+    this.center = false,
+    this.muted = false,
+  });
+
+  final String text;
+  final bool header;
+  final bool active;
+  final bool center;
+  final bool muted;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.all(12),
+      child: Text(
+        text,
+        textAlign: center ? TextAlign.center : TextAlign.left,
+        style: TextStyle(
+          color: active
+              ? colors.focus
+              : muted
+              ? colors.mutedStrong
+              : colors.textStrong,
+          fontSize: header ? 10 : 11,
+          fontWeight: header ? FontWeight.w900 : FontWeight.w800,
+          letterSpacing: header ? 1.1 : 0,
+        ),
+      ),
+    );
+  }
+}
+
+class _ComparisonValueCell extends StatelessWidget {
+  const _ComparisonValueCell({required this.value, required this.active});
+
+  final Object value;
+  final bool active;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+    final child = switch (value) {
+      true => Icon(Icons.check_rounded, color: colors.focus, size: 18),
+      false => Icon(Icons.close_rounded, color: colors.danger, size: 17),
+      _ => Text(
+        '$value'.toUpperCase(),
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          color: colors.textStrong,
+          fontSize: 10,
+          fontWeight: FontWeight.w900,
+          letterSpacing: 0.8,
+        ),
+      ),
+    };
+
+    return Container(
+      color: active ? colors.focus.withValues(alpha: 0.06) : null,
+      alignment: Alignment.center,
+      padding: const EdgeInsets.all(12),
+      child: child,
+    );
+  }
+}
+
+class _InteriorExtrasGrid extends StatelessWidget {
+  const _InteriorExtrasGrid({
+    required this.chosenPack,
+    required this.size,
+    required this.selectedIds,
+    required this.onToggle,
+  });
+
+  final String chosenPack;
+  final CatalogVehicleSize size;
+  final Set<String> selectedIds;
+  final ValueChanged<String> onToggle;
+
+  @override
+  Widget build(BuildContext context) {
+    return _OptionSection(
+      title: chosenPack == 'composition'
+          ? 'Composition personnalisée par élément'
+          : 'Ajouter des Éléments de Reconditionnement',
+      subtitle: chosenPack == 'composition'
+          ? "Composez l'intérieur exactement par zones."
+          : "Cochez les modules d'esthétique pour enrichir le pack Sérénité.",
+      counter: '${selectedIds.length} / ${interiorExtraOptions.length} OPTIONS',
+      children: [
+        for (final option in interiorExtraOptions)
+          _OptionToggleTile(
+            selected: selectedIds.contains(option.id),
+            label: option.name,
+            priceLabel: _basketEuroPlus(option.priceFor(size)),
+            onTap: () => onToggle(option.id),
+          ),
+      ],
+    );
+  }
+}
+
+class _InteriorShampooGrid extends StatelessWidget {
+  const _InteriorShampooGrid({
+    required this.size,
+    required this.selectedIds,
+    required this.onToggle,
+  });
+
+  final CatalogVehicleSize size;
+  final Set<String> selectedIds;
+  final ValueChanged<String> onToggle;
+
+  @override
+  Widget build(BuildContext context) {
+    return _OptionSection(
+      title: 'Shampooing Intérieur Optionnel',
+      subtitle:
+          'Ajoutez un nettoyage textile intérieur à votre prestation extérieure.',
+      children: [
+        for (final option in interiorExtraOptions)
+          _OptionToggleTile(
+            selected: selectedIds.contains(option.id),
+            label: option.name,
+            priceLabel: _basketEuroPlus(option.priceFor(size)),
+            onTap: () => onToggle(option.id),
+          ),
+      ],
+    );
+  }
+}
+
+class _ExteriorSuggestionsGrid extends StatelessWidget {
+  const _ExteriorSuggestionsGrid({
+    required this.size,
+    required this.chosenPack,
+    required this.selectedIds,
+    required this.customPrices,
+    required this.onToggle,
+    required this.onCustomPriceChanged,
+  });
+
+  final CatalogVehicleSize size;
+  final String chosenPack;
+  final Set<String> selectedIds;
+  final Map<String, int> customPrices;
+  final ValueChanged<String> onToggle;
+  final void Function(String id, int value) onCustomPriceChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return _OptionSection(
+      title: "Éléments optionnels & Protections d'atelier",
+      subtitle: 'Enrichissez et protégez votre carrosserie externe.',
+      counter: '${selectedIds.length} OPTIONS',
+      children: [
+        for (final option in exteriorSuggestionOptions)
+          _OptionWithPriceInput(
+            option: option,
+            size: size,
+            chosenPack: chosenPack,
+            selected: selectedIds.contains(option.id),
+            customPrice: customPrices[option.id] ?? 0,
+            onToggle: () => onToggle(option.id),
+            onPriceChanged: (value) => onCustomPriceChanged(option.id, value),
+          ),
+      ],
+    );
+  }
+}
+
+class _OptionSection extends StatelessWidget {
+  const _OptionSection({
+    required this.title,
+    required this.subtitle,
+    required this.children,
+    this.counter,
+  });
+
+  final String title;
+  final String subtitle;
+  final String? counter;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: colors.isLight
+            ? Colors.white
+            : colors.shell.withValues(alpha: 0.40),
+        borderRadius: BorderRadius.circular(2),
+        border: Border.all(color: colors.border),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title.toUpperCase(),
+                      style: TextStyle(
+                        color: colors.focus,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      subtitle,
+                      style: TextStyle(
+                        color: colors.muted,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (counter != null) ...[
+                const SizedBox(width: 12),
+                _SmallBadge(label: counter!),
+              ],
+            ],
+          ),
+          const SizedBox(height: 16),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final columns = constraints.maxWidth < 620
+                  ? 1
+                  : constraints.maxWidth < 980
+                  ? 2
+                  : 3;
+              final width =
+                  (constraints.maxWidth - ((columns - 1) * 10)) / columns;
+              return Wrap(
+                spacing: 10,
+                runSpacing: 10,
+                children: [
+                  for (final child in children)
+                    SizedBox(width: width, child: child),
+                ],
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _OptionWithPriceInput extends StatelessWidget {
+  const _OptionWithPriceInput({
+    required this.option,
+    required this.size,
+    required this.chosenPack,
+    required this.selected,
+    required this.customPrice,
+    required this.onToggle,
+    required this.onPriceChanged,
+  });
+
+  final _ExteriorSuggestionOption option;
+  final CatalogVehicleSize size;
+  final String chosenPack;
+  final bool selected;
+  final int customPrice;
+  final VoidCallback onToggle;
+  final ValueChanged<int> onPriceChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        _OptionToggleTile(
+          selected: selected,
+          label: option.name,
+          priceLabel: option.priceLabel(
+            size: size,
+            pack: chosenPack,
+            customPrice: customPrice,
+          ),
+          onTap: onToggle,
+        ),
+        if (selected && option.isDevis) ...[
+          const SizedBox(height: 6),
+          _CustomPriceField(value: customPrice, onChanged: onPriceChanged),
+        ],
+      ],
+    );
+  }
+}
+
+class _CustomPriceField extends StatelessWidget {
+  const _CustomPriceField({required this.value, required this.onChanged});
+
+  final int value;
+  final ValueChanged<int> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+
+    return TextFormField(
+      initialValue: value > 0 ? '$value' : '',
+      keyboardType: TextInputType.number,
+      onChanged: (raw) => onChanged(int.tryParse(raw.trim()) ?? 0),
+      style: TextStyle(
+        color: colors.textStrong,
+        fontSize: 12,
+        fontWeight: FontWeight.w800,
+      ),
+      decoration: InputDecoration(
+        hintText: 'Prix HTVA',
+        suffixText: '€ HTVA',
+        isDense: true,
+        filled: true,
+        fillColor: colors.surfaceRaised.withValues(
+          alpha: colors.isLight ? 1 : 0.2,
+        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+      ),
+    );
+  }
+}
+
+class _OptionToggleTile extends StatelessWidget {
+  const _OptionToggleTile({
+    required this.selected,
+    required this.label,
+    required this.priceLabel,
+    required this.onTap,
+  });
+
+  final bool selected;
+  final String label;
+  final String priceLabel;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+    final selectedBackground = colors.isLight
+        ? const Color(0xFFF0F1F3)
+        : colors.focus.withValues(alpha: 0.10);
+    final idleBackground = colors.isLight
+        ? Colors.white
+        : colors.surfaceRaised.withValues(alpha: 0.18);
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(2),
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 160),
+          constraints: const BoxConstraints(minHeight: 52),
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            color: selected ? selectedBackground : idleBackground,
+            borderRadius: BorderRadius.circular(2),
+            border: Border.all(
+              color: selected ? colors.borderStrong : colors.border,
+              width: selected && colors.isLight ? 1.4 : 1,
+            ),
+          ),
+          child: Row(
+            children: [
+              _SquareCheck(selected: selected),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  label.toUpperCase(),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: colors.textStrong,
+                    fontSize: 10.5,
+                    height: 1.1,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 0.2,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                priceLabel,
+                style: TextStyle(
+                  color: colors.focus,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SquareCheck extends StatelessWidget {
+  const _SquareCheck({required this.selected});
+
+  final bool selected;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+    final selectedColor = colors.isLight ? _basketAccent : colors.focus;
+
+    return Container(
+      width: 18,
+      height: 18,
+      decoration: BoxDecoration(
+        color: selected ? selectedColor : colors.shell,
+        borderRadius: BorderRadius.circular(2),
+        border: Border.all(
+          color: selected ? selectedColor : colors.borderStrong,
+        ),
+      ),
+      child: selected
+          ? Icon(
+              Icons.check_rounded,
+              color: colors.isLight ? _basketDarkChoice : colors.onFocus,
+              size: 13,
+            )
+          : null,
+    );
+  }
+}
+
+class _MobilityOptionsCard extends StatelessWidget {
+  const _MobilityOptionsCard({
+    required this.selectedPickup,
+    required this.selectedCourtesyCar,
+    required this.onPickupChanged,
+    required this.onCourtesyCarChanged,
+  });
+
+  final bool selectedPickup;
+  final bool selectedCourtesyCar;
+  final ValueChanged<bool> onPickupChanged;
+  final ValueChanged<bool> onCourtesyCarChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return _OptionSection(
+      title: 'Service Pickup',
+      subtitle: 'Prise en charge, retour et mobilité de courtoisie.',
+      children: [
+        _OptionToggleTile(
+          selected: !selectedPickup,
+          label: 'Aucun pickup',
+          priceLabel: '0 €',
+          onTap: () => onPickupChanged(false),
+        ),
+        _OptionToggleTile(
+          selected: selectedPickup,
+          label: 'Pickup aller-retour',
+          priceLabel: '+50 €',
+          onTap: () => onPickupChanged(true),
+        ),
+        _OptionToggleTile(
+          selected: selectedCourtesyCar,
+          label: 'Voiture de courtoisie',
+          priceLabel: '+50 €',
+          onTap: () => onCourtesyCarChanged(!selectedCourtesyCar),
+        ),
+      ],
+    );
+  }
+}
+
 class _BasketLine {
   const _BasketLine({
-    required this.category,
-    required this.service,
+    required this.categoryLabel,
+    required this.serviceLabel,
     required this.quantity,
     required this.unitPrice,
   });
 
-  final ServiceCategory category;
-  final ServiceCatalogEntry service;
+  final String categoryLabel;
+  final String serviceLabel;
   final int quantity;
   final int unitPrice;
 
   int get subtotal => quantity * unitPrice;
 }
+
+class _SizedBasketPrice {
+  const _SizedBasketPrice({required this.s, required this.m, required this.l});
+
+  final int s;
+  final int m;
+  final int l;
+
+  int priceFor(CatalogVehicleSize size) {
+    return switch (size) {
+      CatalogVehicleSize.s => s,
+      CatalogVehicleSize.m => m,
+      CatalogVehicleSize.l => l,
+    };
+  }
+}
+
+class _InteriorExtraOption {
+  const _InteriorExtraOption({
+    required this.id,
+    required this.name,
+    required this.prices,
+  });
+
+  final String id;
+  final String name;
+  final _SizedBasketPrice prices;
+
+  int priceFor(CatalogVehicleSize size) => prices.priceFor(size);
+}
+
+class _ExteriorSuggestionOption {
+  const _ExteriorSuggestionOption({
+    required this.id,
+    required this.name,
+    this.fixedPrice,
+    this.isDevis = false,
+    this.isCeramicChoice = false,
+    this.isSereniteOption = false,
+  });
+
+  final String id;
+  final String name;
+  final int? fixedPrice;
+  final bool isDevis;
+  final bool isCeramicChoice;
+  final bool isSereniteOption;
+
+  int priceFor({
+    required CatalogVehicleSize size,
+    required String pack,
+    int? customPrice,
+  }) {
+    if (isDevis) return customPrice ?? 0;
+    if (isSereniteOption) {
+      if (pack == 'splendeur') {
+        return switch (size) {
+          CatalogVehicleSize.s => 70,
+          CatalogVehicleSize.m => 80,
+          CatalogVehicleSize.l => 100,
+        };
+      }
+      return 50;
+    }
+    return fixedPrice ?? 0;
+  }
+
+  String priceLabel({
+    required CatalogVehicleSize size,
+    required String pack,
+    int? customPrice,
+  }) {
+    if (isDevis && (customPrice ?? 0) <= 0) return 'SUR DEVIS';
+    return _basketEuroPlus(
+      priceFor(size: size, pack: pack, customPrice: customPrice),
+    );
+  }
+}
+
+class _ComparativeItem {
+  const _ComparativeItem({
+    required this.text,
+    required this.splendeur,
+    required this.medium,
+    required this.approfondi,
+  });
+
+  final String text;
+  final Object splendeur;
+  final Object medium;
+  final Object approfondi;
+}
+
+class _PolishingPart {
+  const _PolishingPart({
+    required this.id,
+    required this.label,
+    required this.price,
+  });
+
+  final String id;
+  final String label;
+  final int price;
+}
+
+const packPrices = {
+  'serenite': _SizedBasketPrice(s: 90, m: 100, l: 120),
+  'purete': _SizedBasketPrice(s: 350, m: 420, l: 490),
+  'composition': _SizedBasketPrice(s: 0, m: 0, l: 0),
+  'splendeur': _SizedBasketPrice(s: 890, m: 990, l: 1190),
+  'brillance': _SizedBasketPrice(s: 400, m: 450, l: 500),
+  'renaissance': _SizedBasketPrice(s: 690, m: 790, l: 990),
+  'signature': _SizedBasketPrice(s: 890, m: 990, l: 1190),
+  'medium': _SizedBasketPrice(s: 400, m: 450, l: 500),
+  'approfondi': _SizedBasketPrice(s: 690, m: 790, l: 990),
+};
+
+const interiorExtraOptions = [
+  _InteriorExtraOption(
+    id: 'ciel_toit',
+    name: 'Shampoing Ciel de Toit',
+    prices: _SizedBasketPrice(s: 40, m: 50, l: 60),
+  ),
+  _InteriorExtraOption(
+    id: 'tapis',
+    name: 'Shampoing des Tapis originaux',
+    prices: _SizedBasketPrice(s: 25, m: 30, l: 35),
+  ),
+  _InteriorExtraOption(
+    id: 'panneaux',
+    name: 'Shampoing des Panneaux de Portes',
+    prices: _SizedBasketPrice(s: 30, m: 35, l: 40),
+  ),
+  _InteriorExtraOption(
+    id: 'tableau',
+    name: 'Shampoing du Tableau de Bord',
+    prices: _SizedBasketPrice(s: 20, m: 25, l: 30),
+  ),
+  _InteriorExtraOption(
+    id: 'console_shamp',
+    name: 'Shampoing de la Console Centrale',
+    prices: _SizedBasketPrice(s: 15, m: 20, l: 25),
+  ),
+  _InteriorExtraOption(
+    id: 'coffre',
+    name: 'Shampoing du Compartiment Coffre',
+    prices: _SizedBasketPrice(s: 30, m: 35, l: 40),
+  ),
+  _InteriorExtraOption(
+    id: 'ceinture',
+    name: 'Shampoing des Ceintures de Sécurité',
+    prices: _SizedBasketPrice(s: 15, m: 20, l: 20),
+  ),
+  _InteriorExtraOption(
+    id: 'montants',
+    name: 'Shampoing des Montants Intérieurs',
+    prices: _SizedBasketPrice(s: 15, m: 20, l: 25),
+  ),
+  _InteriorExtraOption(
+    id: 'volant',
+    name: 'Shampoing & Nettoyage Cuir Volant',
+    prices: _SizedBasketPrice(s: 15, m: 20, l: 20),
+  ),
+  _InteriorExtraOption(
+    id: 'nourrissant_cuir',
+    name: 'Traitement Nourrissant des Cuirs',
+    prices: _SizedBasketPrice(s: 35, m: 40, l: 45),
+  ),
+  _InteriorExtraOption(
+    id: 'prelavage',
+    name: 'Prélavage de Carrosserie soigné de nuit',
+    prices: _SizedBasketPrice(s: 20, m: 25, l: 30),
+  ),
+];
+
+const exteriorSuggestionOptions = [
+  _ExteriorSuggestionOption(
+    id: 'moteur_haut',
+    name: 'Nettoyage Compartiment Moteur Haut',
+    fixedPrice: 80,
+  ),
+  _ExteriorSuggestionOption(
+    id: 'moteur_bas',
+    name: 'Nettoyage Compartiment Moteur Bas',
+    fixedPrice: 80,
+  ),
+  _ExteriorSuggestionOption(
+    id: 'expertise_carrosserie',
+    name: 'Expertise Technique de la Carrosserie',
+    fixedPrice: 100,
+  ),
+  _ExteriorSuggestionOption(
+    id: 'ceramique_vitres',
+    name: 'Protection Céramique Vitres & Surfaces vitrées',
+    fixedPrice: 150,
+  ),
+  _ExteriorSuggestionOption(
+    id: 'reparation_jantes',
+    name: 'Réparation & Rénovation de Jante',
+    isDevis: true,
+  ),
+  _ExteriorSuggestionOption(
+    id: 'reparation_carrosserie',
+    name: 'Réparations Carrosserie (Débosselage, etc.)',
+    isDevis: true,
+  ),
+  _ExteriorSuggestionOption(
+    id: 'vitres_teintees',
+    name: 'Pose de Vitres Teintées homologuées',
+    isDevis: true,
+  ),
+  _ExteriorSuggestionOption(
+    id: 'ceramique_1an',
+    name: 'Céramique Carrosserie (Durabilité 1 an)',
+    fixedPrice: 250,
+    isCeramicChoice: true,
+  ),
+  _ExteriorSuggestionOption(
+    id: 'ceramique_3ans',
+    name: 'Céramique Carrosserie (Durabilité 3 ans)',
+    fixedPrice: 500,
+    isCeramicChoice: true,
+  ),
+  _ExteriorSuggestionOption(
+    id: 'ceramique_5ans',
+    name: 'Céramique Carrosserie (Durabilité 5 ans)',
+    fixedPrice: 900,
+    isCeramicChoice: true,
+  ),
+  _ExteriorSuggestionOption(
+    id: 'ceramique_10ans',
+    name: 'Céramique Carrosserie (Durabilité 10 ans)',
+    fixedPrice: 1100,
+    isCeramicChoice: true,
+  ),
+  _ExteriorSuggestionOption(
+    id: 'dsp',
+    name: 'DSP (Débosselage Sans Peinture)',
+    isDevis: true,
+  ),
+  _ExteriorSuggestionOption(
+    id: 'retouche_peinture',
+    name: 'Retouche Peinture localisée',
+    isDevis: true,
+  ),
+  _ExteriorSuggestionOption(
+    id: 'serenite_sug',
+    name: 'Option sérénité (Lavage Intérieur Premium)',
+    isSereniteOption: true,
+  ),
+];
+
+const exteriorComparativeItems = [
+  _ComparativeItem(
+    text: 'Prélavage de la carrosserie',
+    splendeur: true,
+    medium: true,
+    approfondi: true,
+  ),
+  _ComparativeItem(
+    text: 'Nettoyage et dégraissage de jantes',
+    splendeur: true,
+    medium: true,
+    approfondi: true,
+  ),
+  _ComparativeItem(
+    text: 'Lavage de la carrosserie à la main',
+    splendeur: true,
+    medium: true,
+    approfondi: true,
+  ),
+  _ComparativeItem(
+    text: 'Nettoyage des vitres',
+    splendeur: true,
+    medium: true,
+    approfondi: true,
+  ),
+  _ComparativeItem(
+    text: 'Nettoyage de passage de roues',
+    splendeur: true,
+    medium: true,
+    approfondi: true,
+  ),
+  _ComparativeItem(
+    text: 'Contour des portes, coffres & trappe à carburant',
+    splendeur: true,
+    medium: true,
+    approfondi: true,
+  ),
+  _ComparativeItem(
+    text: "Application d'un nano-déperlant",
+    splendeur: true,
+    medium: true,
+    approfondi: true,
+  ),
+  _ComparativeItem(
+    text: 'Rénovateur des plastiques extérieur',
+    splendeur: true,
+    medium: true,
+    approfondi: true,
+  ),
+  _ComparativeItem(
+    text: 'Décontamination de la carrosserie',
+    splendeur: false,
+    medium: true,
+    approfondi: true,
+  ),
+  _ComparativeItem(
+    text: 'Analyse de la carrosserie',
+    splendeur: false,
+    medium: true,
+    approfondi: true,
+  ),
+  _ComparativeItem(
+    text: 'Masquage de tous éléments extérieurs',
+    splendeur: false,
+    medium: true,
+    approfondi: true,
+  ),
+  _ComparativeItem(
+    text: 'Dégraissage',
+    splendeur: false,
+    medium: true,
+    approfondi: true,
+  ),
+  _ComparativeItem(
+    text: 'Cire protectrice (durabilité de 2 mois)',
+    splendeur: false,
+    medium: true,
+    approfondi: true,
+  ),
+  _ComparativeItem(
+    text: 'Polissage en deux étapes (correction micro-rayures)',
+    splendeur: false,
+    medium: true,
+    approfondi: true,
+  ),
+  _ComparativeItem(
+    text: 'Polissage en trois étapes (correction des défauts majeurs)',
+    splendeur: false,
+    medium: false,
+    approfondi: true,
+  ),
+  _ComparativeItem(
+    text: 'Ponçage carrosserie localisé',
+    splendeur: false,
+    medium: false,
+    approfondi: 'Sur devis',
+  ),
+];
 
 class _BasketPageHeader extends StatelessWidget {
   const _BasketPageHeader();
@@ -667,77 +2278,27 @@ class _BasketPageHeader extends StatelessWidget {
   }
 }
 
-class _BasketProgress extends StatelessWidget {
-  const _BasketProgress({required this.step});
-
-  final int step;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = ClcThemeColors.of(context);
-    const labels = ['Prestation', 'Gabarit', 'Services', 'Client', 'Devis'];
-
-    return AppCard(
-      padding: const EdgeInsets.all(10),
-      color: colors.isLight ? colors.surfaceRaised : colors.field,
-      borderColor: colors.border,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final compact = constraints.maxWidth < 700;
-          return Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: [
-              for (var index = 0; index < labels.length; index += 1)
-                SizedBox(
-                  width: compact
-                      ? (constraints.maxWidth - 8) / 2
-                      : (constraints.maxWidth - 32) / labels.length,
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 180),
-                    height: 42,
-                    alignment: Alignment.center,
-                    decoration: BoxDecoration(
-                      color: index + 1 == step ? colors.focus : colors.field,
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: index + 1 == step ? colors.focus : colors.border,
-                      ),
-                    ),
-                    child: Text(
-                      labels[index].toUpperCase(),
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: index + 1 == step
-                            ? colors.onFocus
-                            : colors.muted,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 1.2,
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-}
-
 class _CategoryOpenStep extends StatelessWidget {
-  const _CategoryOpenStep({
-    required this.activeCategoryId,
-    required this.onSelect,
-  });
+  const _CategoryOpenStep({required this.onSelect});
 
-  final String activeCategoryId;
   final ValueChanged<String> onSelect;
 
   @override
   Widget build(BuildContext context) {
     final colors = ClcThemeColors.of(context);
+    const categories = [
+      _PrestationCategory(
+        id: 'interior',
+        label: 'Intérieur',
+        description:
+            'Nettoyage intérieur, vapeur, plastiques, cuir et textile.',
+      ),
+      _PrestationCategory(
+        id: 'exterior',
+        label: 'Extérieur',
+        description: 'Lavage, décontamination, brillance et polissage.',
+      ),
+    ];
 
     return AppCard(
       color: colors.isLight ? colors.surfaceRaised : colors.shell,
@@ -776,12 +2337,12 @@ class _CategoryOpenStep extends StatelessWidget {
                 spacing: 16,
                 runSpacing: 16,
                 children: [
-                  for (final category in officialServiceCategories)
+                  for (final category in categories)
                     SizedBox(
                       width: width,
                       child: _CategoryLaunchCard(
                         category: category,
-                        active: category.id == activeCategoryId,
+                        active: true,
                         onTap: () => onSelect(category.id),
                       ),
                     ),
@@ -795,6 +2356,18 @@ class _CategoryOpenStep extends StatelessWidget {
   }
 }
 
+class _PrestationCategory {
+  const _PrestationCategory({
+    required this.id,
+    required this.label,
+    required this.description,
+  });
+
+  final String id;
+  final String label;
+  final String description;
+}
+
 class _CategoryLaunchCard extends StatelessWidget {
   const _CategoryLaunchCard({
     required this.category,
@@ -802,86 +2375,90 @@ class _CategoryLaunchCard extends StatelessWidget {
     required this.onTap,
   });
 
-  final ServiceCategory category;
+  final _PrestationCategory category;
   final bool active;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     final colors = ClcThemeColors.of(context);
+    final background = colors.isLight
+        ? _basketLightPrestation
+        : colors.surfaceRaised;
+    final borderColor = colors.isLight
+        ? _basketLightPrestationBorder
+        : colors.surfaceRaised;
 
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(16),
         onTap: onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
           constraints: const BoxConstraints(minHeight: 132),
           padding: const EdgeInsets.all(22),
           decoration: BoxDecoration(
-            color: active
-                ? colors.focus.withValues(alpha: colors.isLight ? 0.08 : 0.10)
-                : colors.field,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(
-              color: active ? colors.focus : colors.border,
-              width: active ? 1.4 : 1,
-            ),
-          ),
-          child: Stack(
-            children: [
-              Positioned(
-                right: 0,
-                top: 0,
-                child: _SmallBadge(label: '${category.services.length} lignes'),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(right: 86),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      category.label.toUpperCase(),
-                      style: TextStyle(
-                        color: active ? colors.focus : colors.textStrong,
-                        fontSize: 13,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: 1.4,
-                      ),
+            color: active ? background : colors.field,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: active ? borderColor : colors.border),
+            boxShadow: colors.isLight
+                ? const [
+                    BoxShadow(
+                      color: Color(0x12111827),
+                      blurRadius: 24,
+                      offset: Offset(0, 10),
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      _categoryDescription(category.id),
-                      style: TextStyle(
-                        color: colors.muted,
-                        fontSize: 12,
-                        height: 1.35,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 22),
-                    Row(
-                      children: [
-                        Text(
-                          'LANCER',
-                          style: TextStyle(
-                            color: colors.muted,
-                            fontSize: 10.5,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: 1.2,
-                          ),
-                        ),
-                        const SizedBox(width: 5),
-                        Icon(
-                          Icons.arrow_forward_rounded,
-                          color: colors.muted,
-                          size: 13,
-                        ),
-                      ],
+                  ]
+                : const [
+                    BoxShadow(
+                      color: Color(0x33000000),
+                      blurRadius: 24,
+                      offset: Offset(0, 10),
                     ),
                   ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                category.label.toUpperCase(),
+                style: TextStyle(
+                  color: colors.textStrong,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 1.4,
                 ),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                category.description,
+                style: TextStyle(
+                  color: colors.muted,
+                  fontSize: 12,
+                  height: 1.35,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 22),
+              Row(
+                children: [
+                  Text(
+                    'LANCER',
+                    style: TextStyle(
+                      color: colors.muted,
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                  const SizedBox(width: 5),
+                  Icon(
+                    Icons.arrow_forward_rounded,
+                    color: colors.muted,
+                    size: 13,
+                  ),
+                ],
               ),
             ],
           ),
@@ -922,25 +2499,12 @@ class _StepPanel extends StatelessWidget {
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              border: Border(left: BorderSide(color: colors.focus, width: 4)),
-            ),
             child: Column(
               crossAxisAlignment: centerHeader
                   ? CrossAxisAlignment.center
                   : CrossAxisAlignment.start,
               children: [
-                Text(
-                  accentLabel.toUpperCase(),
-                  textAlign: centerHeader ? TextAlign.center : TextAlign.left,
-                  style: TextStyle(
-                    color: colors.focus,
-                    fontSize: 10,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 3.5,
-                  ),
-                ),
-                const SizedBox(height: 8),
+                if (accentLabel.isNotEmpty) const SizedBox.shrink(),
                 Text(
                   title.toUpperCase(),
                   textAlign: centerHeader ? TextAlign.center : TextAlign.left,
@@ -1031,27 +2595,45 @@ class _SizeChoiceCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = ClcThemeColors.of(context);
     final letter = value.name.toUpperCase();
+    final selectedBackground = colors.isLight
+        ? _basketDarkChoice
+        : colors.focus.withValues(alpha: 0.10);
+    final idleBackground = colors.isLight ? Colors.white : colors.field;
+    final selectedTitleColor = colors.isLight
+        ? Colors.white
+        : colors.textStrong;
+    final selectedMutedColor = colors.isLight
+        ? Colors.white.withValues(alpha: 0.68)
+        : colors.muted;
+    final selectedAccent = colors.isLight ? _basketAccent : colors.focus;
 
     return SizedBox(
       width: width,
       child: Material(
         color: Colors.transparent,
         child: InkWell(
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(2),
           onTap: onTap,
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 180),
             constraints: const BoxConstraints(minHeight: 145),
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: selected
-                  ? colors.focus.withValues(alpha: colors.isLight ? 0.08 : 0.10)
-                  : colors.field,
-              borderRadius: BorderRadius.circular(8),
+              color: selected ? selectedBackground : idleBackground,
+              borderRadius: BorderRadius.circular(2),
               border: Border.all(
-                color: selected ? colors.focus : colors.border,
-                width: selected ? 1.4 : 1,
+                color: selected ? selectedBackground : colors.borderStrong,
+                width: 1,
               ),
+              boxShadow: selected && colors.isLight
+                  ? const [
+                      BoxShadow(
+                        color: Color(0x29111827),
+                        blurRadius: 18,
+                        offset: Offset(0, 8),
+                      ),
+                    ]
+                  : null,
             ),
             child: Stack(
               children: [
@@ -1067,7 +2649,7 @@ class _SizeChoiceCard extends StatelessWidget {
                       Text(
                         letter,
                         style: TextStyle(
-                          color: colors.focus,
+                          color: selected ? selectedAccent : colors.focus,
                           fontSize: 42,
                           fontWeight: FontWeight.w900,
                           height: 1,
@@ -1078,7 +2660,9 @@ class _SizeChoiceCard extends StatelessWidget {
                         title.toUpperCase(),
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: colors.textStrong,
+                          color: selected
+                              ? selectedTitleColor
+                              : colors.textStrong,
                           fontSize: 14,
                           fontWeight: FontWeight.w900,
                           letterSpacing: 1.2,
@@ -1089,7 +2673,7 @@ class _SizeChoiceCard extends StatelessWidget {
                         description,
                         textAlign: TextAlign.center,
                         style: TextStyle(
-                          color: colors.muted,
+                          color: selected ? selectedMutedColor : colors.muted,
                           fontSize: 12,
                           height: 1.35,
                           fontWeight: FontWeight.w600,
@@ -1107,78 +2691,421 @@ class _SizeChoiceCard extends StatelessWidget {
   }
 }
 
-class _ServicesComposerStep extends StatelessWidget {
-  const _ServicesComposerStep({
-    required this.categoryId,
-    required this.activeCategory,
+class _VehicleSizeAndTypeStep extends StatelessWidget {
+  const _VehicleSizeAndTypeStep({
     required this.size,
-    required this.selected,
-    required this.lines,
-    required this.totalHtva,
-    required this.applyVat,
-    required this.onCategoryChanged,
-    required this.onQuantityChanged,
+    required this.categoryId,
+    required this.exteriorChoice,
+    required this.polishType,
+    required this.onSizeChanged,
+    required this.onExteriorChoiceChanged,
+    required this.onPolishTypeChanged,
   });
 
-  final String categoryId;
-  final ServiceCategory activeCategory;
   final CatalogVehicleSize size;
-  final Map<String, int> selected;
-  final List<_BasketLine> lines;
-  final int totalHtva;
-  final bool applyVat;
-  final ValueChanged<String> onCategoryChanged;
-  final void Function(String id, int quantity) onQuantityChanged;
+  final String categoryId;
+  final String exteriorChoice;
+  final String polishType;
+  final ValueChanged<CatalogVehicleSize> onSizeChanged;
+  final ValueChanged<String> onExteriorChoiceChanged;
+  final ValueChanged<String> onPolishTypeChanged;
 
   @override
   Widget build(BuildContext context) {
     final colors = ClcThemeColors.of(context);
+
+    return _StepPanel(
+      accentLabel: 'Etape 2 / 5',
+      title: 'Gabarit du Véhicule',
+      subtitle: 'Sélectionnez le format adapté à votre véhicule.',
+      centerHeader: true,
+      child: Column(
+        children: [
+          _SizeSelector(value: size, onChanged: onSizeChanged),
+          if (categoryId == 'exterior') ...[
+            const SizedBox(height: 28),
+            Divider(color: colors.border),
+            const SizedBox(height: 24),
+            Text(
+              'TYPE DE PRESTATION CARROSSERIE',
+              textAlign: TextAlign.center,
+              style: _sectionTitle(context).copyWith(fontSize: 16),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              "Sélectionnez le niveau d'intervention carrosserie désiré.",
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                color: colors.muted,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 18),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final columns = constraints.maxWidth < 760 ? 1 : 2;
+                final width =
+                    (constraints.maxWidth - ((columns - 1) * 14)) / columns;
+                return Wrap(
+                  spacing: 14,
+                  runSpacing: 14,
+                  alignment: WrapAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: width,
+                      child: _ChoiceCard(
+                        selected: exteriorChoice == 'lavage',
+                        title: 'Lavage',
+                        kicker: 'Pack Splendeur',
+                        description:
+                            'Lavage minutieux de prestige, idéal pour un entretien régulier haut de gamme.',
+                        onTap: () => onExteriorChoiceChanged('lavage'),
+                      ),
+                    ),
+                    SizedBox(
+                      width: width,
+                      child: _ChoiceCard(
+                        selected: exteriorChoice == 'polissage',
+                        title: 'Reconditionnement',
+                        kicker: 'Polissage',
+                        description:
+                            'Gommage des micro-rayures, brillance miroir durable et correction minutieuse du vernis.',
+                        onTap: () => onExteriorChoiceChanged('polissage'),
+                      ),
+                    ),
+                  ],
+                );
+              },
+            ),
+            if (exteriorChoice == 'polissage') ...[
+              const SizedBox(height: 28),
+              Divider(color: colors.border),
+              const SizedBox(height: 24),
+              Text(
+                'CONFIGURATION DU POLISSAGE',
+                textAlign: TextAlign.center,
+                style: _sectionTitle(context).copyWith(fontSize: 16),
+              ),
+              const SizedBox(height: 8),
+              Text(
+                "Optez pour une correction complète ou ciblée selon l'état de votre carrosserie.",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: colors.muted,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 18),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final columns = constraints.maxWidth < 760 ? 1 : 2;
+                  final width =
+                      (constraints.maxWidth - ((columns - 1) * 14)) / columns;
+                  return Wrap(
+                    spacing: 14,
+                    runSpacing: 14,
+                    alignment: WrapAlignment.center,
+                    children: [
+                      SizedBox(
+                        width: width,
+                        child: _ChoiceCard(
+                          selected: polishType == 'integral',
+                          title: 'Polissage intégral',
+                          kicker: 'Complet',
+                          description:
+                              'Traitement intégral de tous les vernis extérieurs du véhicule pour un résultat homogène.',
+                          onTap: () => onPolishTypeChanged('integral'),
+                        ),
+                      ),
+                      SizedBox(
+                        width: width,
+                        child: _ChoiceCard(
+                          selected: polishType == 'partiel',
+                          title: 'Polissage partiel',
+                          kicker: 'Par élément',
+                          description:
+                              'Correction localisée sur un ou plusieurs éléments précis avec tarification sur mesure.',
+                          onTap: () => onPolishTypeChanged('partiel'),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ],
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _ChoiceCard extends StatelessWidget {
+  const _ChoiceCard({
+    required this.selected,
+    required this.title,
+    required this.kicker,
+    required this.description,
+    required this.onTap,
+  });
+
+  final bool selected;
+  final String title;
+  final String kicker;
+  final String description;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+    final selectedBackground = colors.isLight
+        ? _basketDarkChoice
+        : colors.focus.withValues(alpha: 0.10);
+    final idleBackground = colors.isLight ? Colors.white : colors.field;
+    final selectedAccent = colors.isLight ? _basketAccent : colors.focus;
+    final selectedTitleColor = colors.isLight
+        ? Colors.white
+        : colors.textStrong;
+    final selectedMutedColor = colors.isLight
+        ? Colors.white.withValues(alpha: 0.70)
+        : colors.muted;
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(2),
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          constraints: const BoxConstraints(minHeight: 140),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: selected ? selectedBackground : idleBackground,
+            borderRadius: BorderRadius.circular(2),
+            border: Border.all(
+              color: selected ? selectedBackground : colors.borderStrong,
+              width: 1,
+            ),
+            boxShadow: selected && colors.isLight
+                ? const [
+                    BoxShadow(
+                      color: Color(0x16111827),
+                      blurRadius: 18,
+                      offset: Offset(0, 8),
+                    ),
+                  ]
+                : null,
+          ),
+          child: Stack(
+            children: [
+              Positioned(
+                top: 0,
+                right: 0,
+                child: _SelectionDot(selected: selected),
+              ),
+              Center(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(8, 8, 8, 0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        title.toUpperCase(),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: selected ? selectedAccent : colors.focus,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        kicker.toUpperCase(),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: selected
+                              ? selectedTitleColor
+                              : colors.textStrong,
+                          fontSize: 11,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 1.4,
+                        ),
+                      ),
+                      const SizedBox(height: 9),
+                      Text(
+                        description,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: selected ? selectedMutedColor : colors.muted,
+                          fontSize: 11,
+                          height: 1.3,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ServicesComposerStep extends StatelessWidget {
+  const _ServicesComposerStep({
+    required this.categoryId,
+    required this.size,
+    required this.chosenPack,
+    required this.exteriorChoice,
+    required this.polishType,
+    required this.selectedInteriorExtras,
+    required this.selectedExteriorExtras,
+    required this.selectedShampooExtras,
+    required this.customExteriorPrices,
+    required this.selectedPolishingParts,
+    required this.selectedPickup,
+    required this.selectedCourtesyCar,
+    required this.lines,
+    required this.totalHtva,
+    required this.applyVat,
+    required this.onPackChanged,
+    required this.onInteriorExtraToggled,
+    required this.onExteriorExtraToggled,
+    required this.onShampooExtraToggled,
+    required this.onCustomExteriorPriceChanged,
+    required this.onPolishingPartsChanged,
+    required this.onPickupChanged,
+    required this.onCourtesyCarChanged,
+  });
+
+  final String categoryId;
+  final CatalogVehicleSize size;
+  final String chosenPack;
+  final String exteriorChoice;
+  final String polishType;
+  final Set<String> selectedInteriorExtras;
+  final Set<String> selectedExteriorExtras;
+  final Set<String> selectedShampooExtras;
+  final Map<String, int> customExteriorPrices;
+  final List<_PolishingPart> selectedPolishingParts;
+  final bool selectedPickup;
+  final bool selectedCourtesyCar;
+  final List<_BasketLine> lines;
+  final int totalHtva;
+  final bool applyVat;
+  final ValueChanged<String> onPackChanged;
+  final ValueChanged<String> onInteriorExtraToggled;
+  final ValueChanged<String> onExteriorExtraToggled;
+  final ValueChanged<String> onShampooExtraToggled;
+  final void Function(String id, int value) onCustomExteriorPriceChanged;
+  final ValueChanged<List<_PolishingPart>> onPolishingPartsChanged;
+  final ValueChanged<bool> onPickupChanged;
+  final ValueChanged<bool> onCourtesyCarChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+    final isInterior = categoryId == 'interior';
+    final isPartialPolishing =
+        !isInterior && exteriorChoice == 'polissage' && polishType == 'partiel';
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _StepPanel(
           accentLabel: 'Etape 3 / 5',
-          title: 'Personnaliser la prestation',
-          subtitle: 'Ajoutez les options utiles avant de passer au devis.',
+          title: isPartialPolishing
+              ? 'Éléments à polir'
+              : !isInterior && polishType == 'integral'
+              ? 'Comparer le polissage'
+              : 'Personnaliser la prestation',
+          subtitle: isPartialPolishing
+              ? 'Sélectionnez les pièces spécifiques pour le polissage partiel.'
+              : !isInterior && polishType == 'integral'
+              ? 'Choisissez entre polissage moyen et approfondi, puis ajoutez les suggestions utiles.'
+              : 'Ajoutez les options utiles avant de passer au devis.',
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _CategoryTabs(value: categoryId, onChanged: onCategoryChanged),
-              const SizedBox(height: 18),
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  final twoColumns = constraints.maxWidth >= 1040;
-                  final serviceGrid = _ServicePackGrid(
-                    category: activeCategory,
+              if (isInterior) ...[
+                _InteriorPackSelector(
+                  chosenPack: chosenPack,
+                  size: size,
+                  onChanged: onPackChanged,
+                ),
+                const SizedBox(height: 16),
+                _InteriorComparisonTable(chosenPack: chosenPack, size: size),
+                if (chosenPack == 'serenite' ||
+                    chosenPack == 'composition') ...[
+                  const SizedBox(height: 16),
+                  _InteriorExtrasGrid(
+                    chosenPack: chosenPack,
                     size: size,
-                    selected: selected,
-                    onQuantityChanged: onQuantityChanged,
-                  );
-                  final summary = _BasketSummaryCard(
-                    lines: lines,
+                    selectedIds: selectedInteriorExtras,
+                    onToggle: onInteriorExtraToggled,
+                  ),
+                ],
+              ] else ...[
+                if (isPartialPolishing) ...[
+                  _PolishingPartsSelector(
                     size: size,
-                    totalHtva: totalHtva,
-                    compact: twoColumns,
-                  );
-                  if (!twoColumns) {
-                    return Column(
-                      children: [
-                        serviceGrid,
-                        const SizedBox(height: 16),
-                        summary,
-                      ],
-                    );
-                  }
-                  return Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Expanded(flex: 7, child: serviceGrid),
-                      const SizedBox(width: 18),
-                      Expanded(flex: 3, child: summary),
-                    ],
-                  );
-                },
+                    selectedParts: selectedPolishingParts,
+                    onChanged: onPolishingPartsChanged,
+                  ),
+                ] else ...[
+                  if (exteriorChoice == 'lavage')
+                    _ExteriorLavageSelector(
+                      chosenPack: chosenPack,
+                      size: size,
+                      onChanged: onPackChanged,
+                    )
+                  else
+                    _PolishingIntegralSelector(
+                      chosenPack: chosenPack,
+                      size: size,
+                      onChanged: onPackChanged,
+                    ),
+                  const SizedBox(height: 16),
+                  _ExteriorComparisonTable(
+                    chosenPack: chosenPack,
+                    size: size,
+                    showSplendeur: exteriorChoice == 'lavage',
+                  ),
+                  const SizedBox(height: 16),
+                  _ExteriorSuggestionsGrid(
+                    size: size,
+                    chosenPack: chosenPack,
+                    selectedIds: selectedExteriorExtras,
+                    customPrices: customExteriorPrices,
+                    onToggle: onExteriorExtraToggled,
+                    onCustomPriceChanged: onCustomExteriorPriceChanged,
+                  ),
+                ],
+                const SizedBox(height: 16),
+                _InteriorShampooGrid(
+                  size: size,
+                  selectedIds: selectedShampooExtras,
+                  onToggle: onShampooExtraToggled,
+                ),
+              ],
+              const SizedBox(height: 16),
+              _MobilityOptionsCard(
+                selectedPickup: selectedPickup,
+                selectedCourtesyCar: selectedCourtesyCar,
+                onPickupChanged: onPickupChanged,
+                onCourtesyCarChanged: onCourtesyCarChanged,
+              ),
+              const SizedBox(height: 16),
+              _BasketSummaryCard(
+                lines: lines,
+                size: size,
+                totalHtva: totalHtva,
               ),
             ],
           ),
@@ -1188,7 +3115,7 @@ class _ServicesComposerStep extends StatelessWidget {
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: colors.isLight ? colors.surfaceRaised : colors.shell,
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(2),
             border: Border(top: BorderSide(color: colors.focus, width: 4)),
           ),
           child: Row(
@@ -1212,7 +3139,7 @@ class _ServicesComposerStep extends StatelessWidget {
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         Text(
-                          formatMoney(totalHtva),
+                          _basketEuro(totalHtva),
                           style: TextStyle(
                             color: colors.textStrong,
                             fontSize: 28,
@@ -1221,7 +3148,7 @@ class _ServicesComposerStep extends StatelessWidget {
                         ),
                         if (applyVat)
                           Text(
-                            'HTVA (TVAC: ${formatMoney(totalHtva * 1.21)})',
+                            'HTVA (TVAC: ${_basketEuro(totalHtva * 1.21)})',
                             style: TextStyle(
                               color: colors.muted,
                               fontSize: 11,
@@ -1232,7 +3159,7 @@ class _ServicesComposerStep extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'Formule: ${activeCategory.label} [${size.name.toUpperCase()}] + ${lines.length} ligne(s).',
+                      'Formule: ${isInterior ? 'Intérieur' : 'Extérieur'} [${_vehicleSizeLabel(size)}] + ${lines.length} ligne(s).',
                       style: TextStyle(
                         color: colors.muted,
                         fontSize: 11,
@@ -1251,196 +3178,829 @@ class _ServicesComposerStep extends StatelessWidget {
   }
 }
 
-class _CategoryTabs extends StatelessWidget {
-  const _CategoryTabs({required this.value, required this.onChanged});
-
-  final String value;
-  final ValueChanged<String> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return Wrap(
-      spacing: 10,
-      runSpacing: 10,
-      children: [
-        for (final category in officialServiceCategories)
-          _MiniChoiceButton(
-            label: category.label,
-            selected: category.id == value,
-            onTap: () => onChanged(category.id),
-          ),
-      ],
-    );
-  }
-}
-
-class _ServicePackGrid extends StatelessWidget {
-  const _ServicePackGrid({
-    required this.category,
+class _PolishingPartsSelector extends StatefulWidget {
+  const _PolishingPartsSelector({
     required this.size,
-    required this.selected,
-    required this.onQuantityChanged,
+    required this.selectedParts,
+    required this.onChanged,
   });
 
-  final ServiceCategory category;
   final CatalogVehicleSize size;
-  final Map<String, int> selected;
-  final void Function(String id, int quantity) onQuantityChanged;
+  final List<_PolishingPart> selectedParts;
+  final ValueChanged<List<_PolishingPart>> onChanged;
+
+  @override
+  State<_PolishingPartsSelector> createState() =>
+      _PolishingPartsSelectorState();
+}
+
+class _PolishingPartsSelectorState extends State<_PolishingPartsSelector> {
+  static const _svgSize = Size(1448, 1086);
+  static const _views = ['front', 'top', 'rear', 'left', 'right'];
+  static const _viewLabels = {
+    'front': 'Avant',
+    'top': 'Vue supérieure',
+    'rear': 'Arrière',
+    'left': 'Côté gauche',
+    'right': 'Côté droit',
+  };
+  static final Map<String, List<_PolishingZone>> _cache = {};
+
+  late _PolishingProfile _profile;
+  late Future<List<_PolishingZone>> _zonesFuture;
+  Set<String> _selectedGroups = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _profile = _defaultProfile(widget.size);
+    _zonesFuture = _loadZones(_profile);
+    _selectedGroups = widget.selectedParts.map((part) => part.id).toSet();
+  }
+
+  @override
+  void didUpdateWidget(covariant _PolishingPartsSelector oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.size != widget.size) {
+      _profile = _defaultProfile(widget.size);
+      _zonesFuture = _loadZones(_profile);
+      _selectedGroups = {};
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) widget.onChanged(const []);
+      });
+      return;
+    }
+    _selectedGroups = widget.selectedParts.map((part) => part.id).toSet();
+  }
+
+  static _PolishingProfile _defaultProfile(CatalogVehicleSize size) {
+    return switch (size) {
+      CatalogVehicleSize.s => _polishingProfiles.firstWhere(
+        (profile) => profile.key == 'S',
+      ),
+      CatalogVehicleSize.m => _polishingProfiles.firstWhere(
+        (profile) => profile.key == 'M',
+      ),
+      CatalogVehicleSize.l => _polishingProfiles.firstWhere(
+        (profile) => profile.key == 'Grande-Berline',
+      ),
+    };
+  }
+
+  List<_PolishingProfile> get _visibleProfiles {
+    return _polishingProfiles
+        .where((profile) => profile.size == widget.size)
+        .toList();
+  }
+
+  Future<List<_PolishingZone>> _loadZones(_PolishingProfile profile) async {
+    final cacheKey = profile.zoneAsset;
+    final cached = _cache[cacheKey];
+    if (cached != null) return cached;
+    final raw = await rootBundle.loadString(cacheKey);
+    final decoded = jsonDecode(raw) as List<dynamic>;
+    final zones = decoded
+        .whereType<Map<String, dynamic>>()
+        .map(_PolishingZone.fromJson)
+        .where((zone) => zone.profile == profile.zoneProfile)
+        .toList();
+    _cache[cacheKey] = zones;
+    return zones;
+  }
+
+  void _changeProfile(_PolishingProfile profile) {
+    setState(() {
+      _profile = profile;
+      _zonesFuture = _loadZones(profile);
+      _selectedGroups = {};
+    });
+    widget.onChanged(const []);
+  }
+
+  void _toggleZone(_PolishingZone zone, List<_PolishingZone> allZones) {
+    final group = zone.groupKey;
+    setState(() {
+      if (_selectedGroups.contains(group)) {
+        _selectedGroups.remove(group);
+      } else {
+        _selectedGroups.add(group);
+      }
+    });
+    widget.onChanged(_selectedPartsFrom(allZones));
+  }
+
+  List<_PolishingPart> _selectedPartsFrom(List<_PolishingZone> zones) {
+    final byGroup = <String, _PolishingZone>{};
+    for (final zone in zones) {
+      if (_selectedGroups.contains(zone.groupKey)) {
+        byGroup.putIfAbsent(zone.groupKey, () => zone);
+      }
+    }
+    return [
+      for (final entry in byGroup.entries)
+        _PolishingPart(
+          id: entry.key,
+          label: entry.value.label,
+          price: entry.value.price,
+        ),
+    ];
+  }
+
+  void _handleTap({
+    required TapDownDetails details,
+    required BoxConstraints constraints,
+    required String view,
+    required List<_PolishingZone> zones,
+  }) {
+    final point = Offset(
+      details.localPosition.dx / constraints.maxWidth * _svgSize.width,
+      details.localPosition.dy /
+          (constraints.maxWidth / _svgSize.aspectRatio) *
+          _svgSize.height,
+    );
+    final viewZones = zones.where((zone) => zone.view == view).toList();
+    for (final zone in viewZones.reversed) {
+      if (zone.path.contains(point)) {
+        _toggleZone(zone, zones);
+        return;
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final columns = constraints.maxWidth < 650
-            ? 1
-            : constraints.maxWidth < 1000
-            ? 2
-            : 3;
-        final width = (constraints.maxWidth - ((columns - 1) * 12)) / columns;
-        return Wrap(
-          spacing: 12,
-          runSpacing: 12,
-          children: [
-            for (final service in category.services)
-              SizedBox(
-                width: width,
-                child: _ServicePackCard(
-                  service: service,
-                  price: service.price.resolve(size),
-                  sizeLabel: size.name.toUpperCase(),
-                  quantity: selected[service.id] ?? 0,
-                  onQuantityChanged: (quantity) =>
-                      onQuantityChanged(service.id, quantity),
+    const panelBackground = Color(0xFF050505);
+    const panelRaised = Color(0xFF09090B);
+    const panelBorder = Color(0x1AFFFFFF);
+    const panelText = Colors.white;
+    const panelMuted = Color(0xFF71717A);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: panelBackground,
+        borderRadius: BorderRadius.circular(2),
+        border: Border.all(color: panelBorder),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'POLISSAGE PARTIEL — CARTOGRAPHIE INTERACTIVE',
+                      style: TextStyle(
+                        color: panelText,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Clique sur les pièces du véhicule pour composer le polissage partiel.',
+                      style: TextStyle(
+                        color: panelMuted,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-          ],
-        );
-      },
+              const SizedBox(width: 12),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 10,
+                ),
+                decoration: BoxDecoration(
+                  color: _basketAccent.withValues(alpha: 0.10),
+                  border: Border.all(
+                    color: _basketAccent.withValues(alpha: 0.35),
+                  ),
+                ),
+                child: Text(
+                  _profile.label.toUpperCase(),
+                  style: const TextStyle(
+                    color: _basketAccent,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1.4,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(14),
+            decoration: BoxDecoration(
+              color: panelRaised,
+              border: Border.all(color: panelBorder),
+            ),
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                for (final profile in _visibleProfiles)
+                  _PolishingProfileButton(
+                    label: profile.label,
+                    selected: profile.key == _profile.key,
+                    onTap: () => _changeProfile(profile),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 18),
+          FutureBuilder<List<_PolishingZone>>(
+            future: _zonesFuture,
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) return const _LoadingBlock();
+              final zones = snapshot.data!;
+              final selectedParts = _selectedPartsFrom(zones);
+              final total = selectedParts.fold<int>(
+                0,
+                (sum, part) => sum + part.price,
+              );
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final columns = constraints.maxWidth < 720
+                          ? 1
+                          : constraints.maxWidth < 900
+                          ? 2
+                          : 3;
+                      final width =
+                          (constraints.maxWidth - ((columns - 1) * 12)) /
+                          columns;
+                      return Wrap(
+                        spacing: 12,
+                        runSpacing: 12,
+                        children: [
+                          for (final view in _views)
+                            SizedBox(
+                              width: width,
+                              child: _PolishingViewCard(
+                                profile: _profile,
+                                view: view,
+                                viewLabel: _viewLabels[view] ?? view,
+                                zones: zones,
+                                selectedGroups: _selectedGroups,
+                                onTap: (details, constraints) => _handleTap(
+                                  details: details,
+                                  constraints: constraints,
+                                  view: view,
+                                  zones: zones,
+                                ),
+                              ),
+                            ),
+                        ],
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 18),
+                  _SelectedPolishingPartsPanel(
+                    parts: selectedParts,
+                    total: total,
+                    onRemove: (part) {
+                      setState(() => _selectedGroups.remove(part.id));
+                      widget.onChanged(_selectedPartsFrom(zones));
+                    },
+                  ),
+                ],
+              );
+            },
+          ),
+        ],
+      ),
     );
   }
 }
 
-class _ServicePackCard extends StatelessWidget {
-  const _ServicePackCard({
-    required this.service,
-    required this.price,
-    required this.sizeLabel,
-    required this.quantity,
-    required this.onQuantityChanged,
+class _PolishingProfileButton extends StatelessWidget {
+  const _PolishingProfileButton({
+    required this.label,
+    required this.selected,
+    required this.onTap,
   });
 
-  final ServiceCatalogEntry service;
-  final int price;
-  final String sizeLabel;
-  final int quantity;
-  final ValueChanged<int> onQuantityChanged;
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final colors = ClcThemeColors.of(context);
-    final selected = quantity > 0;
-
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(8),
-        onTap: () => onQuantityChanged(selected ? 0 : 1),
+        onTap: onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
-          constraints: const BoxConstraints(minHeight: 168),
-          padding: const EdgeInsets.all(18),
+          constraints: const BoxConstraints(minHeight: 42, minWidth: 128),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
           decoration: BoxDecoration(
-            color: selected
-                ? colors.focus.withValues(alpha: colors.isLight ? 0.08 : 0.10)
-                : colors.field,
-            borderRadius: BorderRadius.circular(8),
+            color: selected ? _basketAccent : Colors.black,
             border: Border.all(
-              color: selected ? colors.focus : colors.border,
-              width: selected ? 1.4 : 1,
+              color: selected
+                  ? _basketAccent
+                  : Colors.white.withValues(alpha: 0.10),
             ),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              SizedBox(
-                height: 24,
-                child: selected
-                    ? _SmallBadge(label: 'Selectionne')
-                    : const SizedBox.shrink(),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                service.label.toUpperCase(),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: colors.textStrong,
-                  fontSize: 16,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 0.8,
-                ),
-              ),
-              const SizedBox(height: 14),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  Expanded(
-                    child: Text(
-                      service.price.isFixed
-                          ? 'TARIF FIXE :'
-                          : 'TARIF FORMAT $sizeLabel :',
-                      style: TextStyle(
-                        color: colors.muted,
-                        fontSize: 10,
-                        fontWeight: FontWeight.w800,
-                        letterSpacing: 1.1,
-                      ),
-                    ),
-                  ),
-                  Text(
-                    formatMoney(price),
-                    style: TextStyle(
-                      color: colors.focus,
-                      fontSize: 19,
-                      fontWeight: FontWeight.w900,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 14),
-              Row(
-                children: [
-                  _QuantityButton(
-                    icon: Icons.remove_rounded,
-                    enabled: quantity > 0,
-                    onTap: () => onQuantityChanged(quantity - 1),
-                  ),
-                  Container(
-                    width: 42,
-                    alignment: Alignment.center,
-                    child: Text(
-                      '$quantity',
-                      style: TextStyle(
-                        color: colors.textStrong,
-                        fontSize: 17,
-                        fontWeight: FontWeight.w900,
-                      ),
-                    ),
-                  ),
-                  _QuantityButton(
-                    icon: Icons.add_rounded,
-                    enabled: true,
-                    onTap: () => onQuantityChanged(quantity + 1),
-                  ),
-                ],
-              ),
-            ],
+          child: Text(
+            label.toUpperCase(),
+            textAlign: TextAlign.left,
+            style: TextStyle(
+              color: selected ? _basketDarkChoice : const Color(0xFFD4D4D8),
+              fontSize: 10,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 1.2,
+            ),
           ),
         ),
       ),
     );
   }
+}
+
+class _PolishingViewCard extends StatelessWidget {
+  const _PolishingViewCard({
+    required this.profile,
+    required this.view,
+    required this.viewLabel,
+    required this.zones,
+    required this.selectedGroups,
+    required this.onTap,
+  });
+
+  final _PolishingProfile profile;
+  final String view;
+  final String viewLabel;
+  final List<_PolishingZone> zones;
+  final Set<String> selectedGroups;
+  final void Function(TapDownDetails details, BoxConstraints constraints) onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final viewZones = zones.where((zone) => zone.view == view).toList();
+    final selectedCount = viewZones
+        .where((zone) => selectedGroups.contains(zone.groupKey))
+        .length;
+
+    return Container(
+      padding: const EdgeInsets.all(10),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(2),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.10)),
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  viewLabel.toUpperCase(),
+                  style: TextStyle(
+                    color: _basketDarkChoice,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 1.4,
+                  ),
+                ),
+              ),
+              Text(
+                '$selectedCount sélectionné(s)',
+                style: TextStyle(
+                  color: const Color(0xFF52525B),
+                  fontSize: 10,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              return GestureDetector(
+                onTapDown: (details) => onTap(details, constraints),
+                child: AspectRatio(
+                  aspectRatio: 1448 / 1086,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      Image.asset(
+                        'assets/polishing/${profile.folder}/$view.png',
+                        fit: BoxFit.contain,
+                      ),
+                      CustomPaint(
+                        painter: _PolishingZonesPainter(
+                          zones: viewZones,
+                          selectedGroups: selectedGroups,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SelectedPolishingPartsPanel extends StatelessWidget {
+  const _SelectedPolishingPartsPanel({
+    required this.parts,
+    required this.total,
+    required this.onRemove,
+  });
+
+  final List<_PolishingPart> parts;
+  final int total;
+  final ValueChanged<_PolishingPart> onRemove;
+
+  @override
+  Widget build(BuildContext context) {
+    const panelBorder = Color(0x1AFFFFFF);
+    const panelMuted = Color(0xFF71717A);
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF09090B),
+        borderRadius: BorderRadius.circular(2),
+        border: Border.all(color: panelBorder),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  'SÉLECTION POLISSAGE PARTIEL',
+                  style: TextStyle(
+                    color: panelMuted,
+                    fontSize: 10,
+                    fontWeight: FontWeight.w900,
+                    letterSpacing: 2,
+                  ),
+                ),
+              ),
+              Text(
+                _basketEuro(total),
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 26,
+                  fontWeight: FontWeight.w900,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          if (parts.isEmpty)
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.black,
+                border: Border.all(color: panelBorder),
+              ),
+              child: const Text(
+                'AUCUNE ZONE SÉLECTIONNÉE',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: panelMuted,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 1.8,
+                ),
+              ),
+            )
+          else
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final columns = constraints.maxWidth < 700 ? 1 : 2;
+                final width =
+                    (constraints.maxWidth - ((columns - 1) * 10)) / columns;
+                return Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: [
+                    for (final part in parts)
+                      SizedBox(
+                        width: width,
+                        child: Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: Colors.black,
+                            borderRadius: BorderRadius.circular(2),
+                            border: Border.all(color: panelBorder),
+                          ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      part.label.toUpperCase(),
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w900,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 3),
+                                    Text(
+                                      'Polissage partiel',
+                                      style: TextStyle(
+                                        color: panelMuted,
+                                        fontSize: 10,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Text(
+                                _basketEuro(part.price),
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w900,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              IconButton(
+                                visualDensity: VisualDensity.compact,
+                                onPressed: () => onRemove(part),
+                                icon: Icon(
+                                  Icons.close_rounded,
+                                  color: panelMuted,
+                                  size: 16,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                  ],
+                );
+              },
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _PolishingZonesPainter extends CustomPainter {
+  const _PolishingZonesPainter({
+    required this.zones,
+    required this.selectedGroups,
+  });
+
+  final List<_PolishingZone> zones;
+  final Set<String> selectedGroups;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final scaleX = size.width / _PolishingPartsSelectorState._svgSize.width;
+    final scaleY = size.height / _PolishingPartsSelectorState._svgSize.height;
+    canvas.save();
+    canvas.scale(scaleX, scaleY);
+    for (final zone in zones) {
+      final selected = selectedGroups.contains(zone.groupKey);
+      final fill = Paint()
+        ..style = PaintingStyle.fill
+        ..color = selected
+            ? _basketAccent.withValues(alpha: 0.42)
+            : Colors.transparent;
+      final stroke = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = selected ? 5 : 2
+        ..color = selected ? const Color(0xFF5F8700) : Colors.transparent;
+      canvas.drawPath(zone.path, fill);
+      canvas.drawPath(zone.path, stroke);
+      if (selected) {
+        final markerFill = Paint()..color = _basketAccent;
+        canvas.drawCircle(zone.labelPoint, 22, markerFill);
+        final textPainter = TextPainter(
+          text: TextSpan(
+            text: '✓',
+            style: TextStyle(
+              color: _basketDarkChoice,
+              fontSize: 24,
+              fontWeight: FontWeight.w900,
+            ),
+          ),
+          textDirection: TextDirection.ltr,
+        )..layout();
+        textPainter.paint(
+          canvas,
+          zone.labelPoint -
+              Offset(textPainter.width / 2, textPainter.height / 2),
+        );
+      }
+    }
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(covariant _PolishingZonesPainter oldDelegate) {
+    return oldDelegate.zones != zones ||
+        oldDelegate.selectedGroups != selectedGroups;
+  }
+}
+
+class _PolishingProfile {
+  const _PolishingProfile({
+    required this.key,
+    required this.label,
+    required this.size,
+    required this.folder,
+    required this.zoneAsset,
+    required this.zoneProfile,
+  });
+
+  final String key;
+  final String label;
+  final CatalogVehicleSize size;
+  final String folder;
+  final String zoneAsset;
+  final String zoneProfile;
+}
+
+const _polishingProfiles = [
+  _PolishingProfile(
+    key: 'S',
+    label: 'Citadine compacte',
+    size: CatalogVehicleSize.s,
+    folder: 'S',
+    zoneAsset: 'assets/data/polishing/sPolishingZones.json',
+    zoneProfile: 'S',
+  ),
+  _PolishingProfile(
+    key: 'M',
+    label: 'Citadine',
+    size: CatalogVehicleSize.m,
+    folder: 'M',
+    zoneAsset: 'assets/data/polishing/tailleMPolishingZones.json',
+    zoneProfile: 'M',
+  ),
+  _PolishingProfile(
+    key: 'Berline',
+    label: 'Berline',
+    size: CatalogVehicleSize.m,
+    folder: 'Berline',
+    zoneAsset: 'assets/data/polishing/berlinePolishingZones.json',
+    zoneProfile: 'Berline',
+  ),
+  _PolishingProfile(
+    key: 'Grande-Berline',
+    label: 'Grande berline',
+    size: CatalogVehicleSize.l,
+    folder: 'Berline',
+    zoneAsset: 'assets/data/polishing/berlinePolishingZones.json',
+    zoneProfile: 'Berline',
+  ),
+  _PolishingProfile(
+    key: 'Break',
+    label: 'Break',
+    size: CatalogVehicleSize.l,
+    folder: 'Break',
+    zoneAsset: 'assets/data/polishing/breakPolishingZones.json',
+    zoneProfile: 'Break',
+  ),
+  _PolishingProfile(
+    key: 'Camionette',
+    label: 'Camionnette',
+    size: CatalogVehicleSize.l,
+    folder: 'Camionette',
+    zoneAsset: 'assets/data/polishing/camionettePolishingZones.json',
+    zoneProfile: 'Camionette',
+  ),
+];
+
+class _PolishingZone {
+  _PolishingZone({
+    required this.id,
+    required this.label,
+    required this.price,
+    required this.profile,
+    required this.view,
+    required this.path,
+    required this.labelPoint,
+  });
+
+  final String id;
+  final String label;
+  final int price;
+  final String profile;
+  final String view;
+  final Path path;
+  final Offset labelPoint;
+
+  String get groupKey => '$profile:${_normalizeZoneLabel(label)}';
+
+  factory _PolishingZone.fromJson(Map<String, dynamic> json) {
+    return _PolishingZone(
+      id: json['id'] as String,
+      label: _cleanZoneLabel(json['label'] as String),
+      price: (json['price'] as num).round(),
+      profile: json['profile'] as String,
+      view: json['view'] as String,
+      path: _pointsToPath(json['points'] as String),
+      labelPoint: Offset(
+        (json['labelX'] as num).toDouble(),
+        (json['labelY'] as num).toDouble(),
+      ),
+    );
+  }
+}
+
+Path _pointsToPath(String raw) {
+  final points = raw
+      .trim()
+      .split(RegExp(r'\s+'))
+      .where((item) => item.isNotEmpty)
+      .map((item) {
+        final parts = item.split(',');
+        return Offset(
+          double.tryParse(parts.first) ?? 0,
+          double.tryParse(parts.length > 1 ? parts[1] : '0') ?? 0,
+        );
+      })
+      .toList();
+  final path = Path();
+  if (points.isEmpty) return path;
+  path.moveTo(points.first.dx, points.first.dy);
+  for (final point in points.skip(1)) {
+    path.lineTo(point.dx, point.dy);
+  }
+  path.close();
+  return path;
+}
+
+String _cleanZoneLabel(String label) {
+  return label
+      .replaceAll(RegExp(r'\s+'), ' ')
+      .replaceAll(RegExp(r'\s+\)'), ')')
+      .replaceAll(RegExp(r'\(\s+'), '(')
+      .trim();
+}
+
+String _normalizeZoneLabel(String label) {
+  const accents = {
+    'à': 'a',
+    'á': 'a',
+    'â': 'a',
+    'ã': 'a',
+    'ä': 'a',
+    'å': 'a',
+    'ç': 'c',
+    'è': 'e',
+    'é': 'e',
+    'ê': 'e',
+    'ë': 'e',
+    'ì': 'i',
+    'í': 'i',
+    'î': 'i',
+    'ï': 'i',
+    'ñ': 'n',
+    'ò': 'o',
+    'ó': 'o',
+    'ô': 'o',
+    'õ': 'o',
+    'ö': 'o',
+    'ù': 'u',
+    'ú': 'u',
+    'û': 'u',
+    'ü': 'u',
+    'ý': 'y',
+    'ÿ': 'y',
+  };
+  final lower = _cleanZoneLabel(label).toLowerCase();
+  final buffer = StringBuffer();
+  for (final rune in lower.runes) {
+    final char = String.fromCharCode(rune);
+    buffer.write(accents[char] ?? char);
+  }
+  return buffer.toString();
 }
 
 class _ClientVehicleStep extends StatelessWidget {
@@ -1942,7 +4502,7 @@ class _FinalSynthesisStep extends StatelessWidget {
   const _FinalSynthesisStep({
     required this.lines,
     required this.size,
-    required this.activeCategory,
+    required this.activeCategoryLabel,
     required this.selectedClient,
     required this.selectedVehicle,
     required this.totalHtva,
@@ -1961,7 +4521,7 @@ class _FinalSynthesisStep extends StatelessWidget {
 
   final List<_BasketLine> lines;
   final CatalogVehicleSize size;
-  final ServiceCategory activeCategory;
+  final String activeCategoryLabel;
   final Client? selectedClient;
   final Vehicle? selectedVehicle;
   final int totalHtva;
@@ -2019,7 +4579,7 @@ class _FinalSynthesisStep extends StatelessWidget {
                       _SummaryTile(
                         width: width,
                         label: 'Service',
-                        value: activeCategory.label,
+                        value: activeCategoryLabel,
                       ),
                       _SummaryTile(
                         width: width,
@@ -2202,13 +4762,11 @@ class _BasketSummaryCard extends StatelessWidget {
     required this.lines,
     required this.size,
     required this.totalHtva,
-    this.compact = false,
   });
 
   final List<_BasketLine> lines;
   final CatalogVehicleSize size;
   final int totalHtva;
-  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -2219,7 +4777,7 @@ class _BasketSummaryCard extends StatelessWidget {
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
         color: colors.field,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(2),
         border: Border.all(color: colors.focus.withValues(alpha: 0.35)),
       ),
       child: Column(
@@ -2248,7 +4806,7 @@ class _BasketSummaryCard extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        '${line.quantity} x ${line.service.label}',
+                        '${line.quantity} x ${line.serviceLabel}',
                         style: TextStyle(
                           color: colors.textStrong,
                           fontWeight: FontWeight.w800,
@@ -2256,7 +4814,7 @@ class _BasketSummaryCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      formatMoney(line.subtotal),
+                      _basketEuro(line.subtotal),
                       style: TextStyle(
                         color: colors.textStrong,
                         fontWeight: FontWeight.w900,
@@ -2279,10 +4837,10 @@ class _BasketSummaryCard extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            formatMoney(totalHtva),
+            _basketEuro(totalHtva),
             style: TextStyle(
               color: colors.focus,
-              fontSize: compact ? 30 : 34,
+              fontSize: 34,
               fontWeight: FontWeight.w300,
             ),
           ),
@@ -2335,7 +4893,7 @@ class _SelectedLinesList extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        line.service.label.toUpperCase(),
+                        line.serviceLabel.toUpperCase(),
                         style: TextStyle(
                           color: colors.textStrong,
                           fontSize: 11,
@@ -2345,14 +4903,14 @@ class _SelectedLinesList extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        line.category.label,
+                        line.categoryLabel,
                         style: TextStyle(color: colors.muted, fontSize: 10),
                       ),
                     ],
                   ),
                 ),
                 Text(
-                  '${line.quantity} x ${formatMoney(line.unitPrice)}',
+                  '${line.quantity} x ${_basketEuro(line.unitPrice)}',
                   style: TextStyle(
                     color: colors.muted,
                     fontSize: 11,
@@ -2361,7 +4919,7 @@ class _SelectedLinesList extends StatelessWidget {
                 ),
                 const SizedBox(width: 12),
                 Text(
-                  formatMoney(line.subtotal),
+                  _basketEuro(line.subtotal),
                   style: TextStyle(
                     color: colors.focus,
                     fontSize: 12,
@@ -2412,10 +4970,10 @@ class _TotalPanel extends StatelessWidget {
               children: [
                 _TotalMini(
                   label: 'Sous-total HTVA',
-                  value: formatMoney(totalHtva),
+                  value: _basketEuro(totalHtva),
                 ),
                 const SizedBox(width: 16),
-                _TotalMini(label: 'TVA 21%', value: formatMoney(vatTotal)),
+                _TotalMini(label: 'TVA 21%', value: _basketEuro(vatTotal)),
               ],
             ),
             const SizedBox(height: 14),
@@ -2447,7 +5005,7 @@ class _TotalPanel extends StatelessWidget {
                 ),
               ),
               Text(
-                formatMoney(applyVat ? totalWithVat : totalHtva),
+                _basketEuro(applyVat ? totalWithVat : totalHtva),
                 style: TextStyle(
                   color: colors.textStrong,
                   fontSize: 25,
@@ -2895,84 +5453,6 @@ class _ModeButton extends StatelessWidget {
   }
 }
 
-class _MiniChoiceButton extends StatelessWidget {
-  const _MiniChoiceButton({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = ClcThemeColors.of(context);
-
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(8),
-        onTap: onTap,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
-          decoration: BoxDecoration(
-            color: selected ? colors.focus : colors.field,
-            borderRadius: BorderRadius.circular(8),
-            border: Border.all(color: selected ? colors.focus : colors.border),
-          ),
-          child: Text(
-            label.toUpperCase(),
-            style: TextStyle(
-              color: selected ? colors.onFocus : colors.textStrong,
-              fontSize: 10,
-              fontWeight: FontWeight.w900,
-              letterSpacing: 1.2,
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _QuantityButton extends StatelessWidget {
-  const _QuantityButton({
-    required this.icon,
-    required this.enabled,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final bool enabled;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = ClcThemeColors.of(context);
-
-    return SizedBox(
-      width: 38,
-      height: 38,
-      child: IconButton(
-        onPressed: enabled ? onTap : null,
-        icon: Icon(icon, size: 18),
-        color: colors.focus,
-        disabledColor: colors.muted.withValues(alpha: 0.35),
-        style: IconButton.styleFrom(
-          backgroundColor: colors.field,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-            side: BorderSide(color: colors.border),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _SelectionDot extends StatelessWidget {
   const _SelectionDot({required this.selected});
 
@@ -2981,19 +5461,24 @@ class _SelectionDot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = ClcThemeColors.of(context);
+    final selectedColor = colors.isLight ? _basketAccent : colors.focus;
 
     return Container(
       width: 18,
       height: 18,
       decoration: BoxDecoration(
-        color: selected ? colors.focus : Colors.transparent,
+        color: selected ? selectedColor : Colors.transparent,
         shape: BoxShape.circle,
         border: Border.all(
-          color: selected ? colors.focus : colors.borderStrong,
+          color: selected ? selectedColor : colors.borderStrong,
         ),
       ),
       child: selected
-          ? Icon(Icons.check_rounded, size: 13, color: colors.onFocus)
+          ? Icon(
+              Icons.check_rounded,
+              size: 13,
+              color: colors.isLight ? _basketDarkChoice : colors.onFocus,
+            )
           : null,
     );
   }
@@ -3240,22 +5725,19 @@ TextStyle _sectionTitle(BuildContext context) {
   );
 }
 
-String _categoryDescription(String id) {
-  return switch (id) {
-    'lavage' => 'Lavage, decontamination et brillance exterieure.',
-    'reconditionnement' => 'Remise a neuf interieur et exterieur premium.',
-    'polissage' => 'Correction et renovation de carrosserie.',
-    'ceramique' => 'Protection durable des surfaces et finitions.',
-    'supplements' => 'Modules additionnels, pickup et extras atelier.',
-    _ => 'Composition personnalisee.',
-  };
-}
-
 String _vehicleSizeLabel(CatalogVehicleSize size) {
   return switch (size) {
     CatalogVehicleSize.s => 'Taille S',
     CatalogVehicleSize.m => 'Taille M',
     CatalogVehicleSize.l => 'Taille L',
+  };
+}
+
+String _vehicleSizeCode(CatalogVehicleSize size) {
+  return switch (size) {
+    CatalogVehicleSize.s => 'S',
+    CatalogVehicleSize.m => 'M',
+    CatalogVehicleSize.l => 'L',
   };
 }
 

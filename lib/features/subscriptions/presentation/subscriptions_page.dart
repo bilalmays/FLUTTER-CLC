@@ -145,92 +145,57 @@ class _SubscriptionsPageState extends ConsumerState<SubscriptionsPage> {
     };
 
     return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Wrap(
-            spacing: 14,
-            runSpacing: 12,
-            crossAxisAlignment: WrapCrossAlignment.center,
-            children: [
-              if (_activeModule != null)
-                TextButton.icon(
-                  style: TextButton.styleFrom(
-                    foregroundColor: colors.mutedStrong,
-                    textStyle: const TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 2,
-                    ),
-                  ),
-                  onPressed: () => setState(() => _activeModule = null),
-                  icon: const Icon(Icons.chevron_left_rounded, size: 18),
-                  label: const Text('RETOUR'),
-                ),
-              Text(
-                activeTitle,
-                style: TextStyle(
-                  color: colors.textStrong,
-                  fontSize: 46,
-                  height: 0.96,
-                  fontWeight: FontWeight.w300,
-                  letterSpacing: 0,
-                ),
+      child: _activeModule == null
+          ? _CrmLandingPage(
+              loading: _loading,
+              onHelp: () => _showSnack(
+                'Aide CRM: gere les abonnements et la flotte de courtoisie.',
               ),
-            ],
-          ),
-          const SizedBox(height: 30),
-          if (_activeModule == null)
-            Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 900),
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    final columns =
-                        Responsive.isMobile(context) ||
-                            constraints.maxWidth < 720
-                        ? 1
-                        : 2;
-                    final gap = 16.0;
-                    final width =
-                        (constraints.maxWidth - (gap * (columns - 1))) /
-                        columns;
-                    return Wrap(
-                      spacing: gap,
-                      runSpacing: gap,
-                      children: [
-                        _CrmModuleCard(
-                          width: width,
-                          icon: Icons.workspace_premium_outlined,
-                          label: 'Abonnements',
-                          note:
-                              'Clients abonnes, plan, paiements, passages et fin de contrat.',
-                          onTap: () => setState(
-                            () => _activeModule = CrmModule.subscriptions,
-                          ),
-                        ),
-                        _CrmModuleCard(
-                          width: width,
-                          icon: Icons.directions_car_filled_outlined,
-                          label: 'Voiture de courtoisie',
-                          note:
-                              'Suivi des voitures pretees, disponibilites et retours.',
-                          onTap: () => setState(
-                            () => _activeModule = CrmModule.courtesy,
-                          ),
-                        ),
-                      ],
-                    );
-                  },
-                ),
-              ),
+              onOpenSubscriptions: () =>
+                  setState(() => _activeModule = CrmModule.subscriptions),
+              onOpenCourtesy: () =>
+                  setState(() => _activeModule = CrmModule.courtesy),
             )
-          else if (_activeModule == CrmModule.courtesy)
-            const _CourtesyPanel()
-          else
-            _buildSubscriptionsPanel(isMobile),
-        ],
-      ),
+          : Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Wrap(
+                  spacing: 14,
+                  runSpacing: 12,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    TextButton.icon(
+                      style: TextButton.styleFrom(
+                        foregroundColor: colors.mutedStrong,
+                        textStyle: const TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: 2,
+                        ),
+                      ),
+                      onPressed: () => setState(() => _activeModule = null),
+                      icon: const Icon(Icons.chevron_left_rounded, size: 18),
+                      label: const Text('RETOUR'),
+                    ),
+                    Text(
+                      activeTitle,
+                      style: TextStyle(
+                        color: colors.textStrong,
+                        fontSize: 46,
+                        height: 0.96,
+                        fontWeight: FontWeight.w300,
+                        letterSpacing: 0,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 30),
+                if (_activeModule == CrmModule.courtesy)
+                  const _CourtesyPanel()
+                else
+                  _buildSubscriptionsPanel(isMobile),
+              ],
+            ),
     );
   }
 
@@ -339,12 +304,203 @@ class _SubscriptionsPageState extends ConsumerState<SubscriptionsPage> {
   }
 }
 
+class _CrmLandingPage extends StatelessWidget {
+  const _CrmLandingPage({
+    required this.loading,
+    required this.onHelp,
+    required this.onOpenSubscriptions,
+    required this.onOpenCourtesy,
+  });
+
+  final bool loading;
+  final VoidCallback onHelp;
+  final VoidCallback onOpenSubscriptions;
+  final VoidCallback onOpenCourtesy;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = ClcThemeColors.of(context);
+    const navy = Color(0xFF061A4A);
+
+    return Center(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 1180),
+        child: Padding(
+          padding: EdgeInsets.symmetric(
+            horizontal: Responsive.isMobile(context) ? 2 : 8,
+            vertical: Responsive.isMobile(context) ? 8 : 4,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'CRM',
+                          style: TextStyle(
+                            color: colors.isLight ? navy : colors.textStrong,
+                            fontSize: Responsive.isMobile(context) ? 38 : 48,
+                            height: 1,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: 0,
+                          ),
+                        ),
+                        const SizedBox(height: 14),
+                        Text(
+                          'Gérez vos abonnements et votre flotte de courtoisie en toute simplicité.',
+                          style: TextStyle(
+                            color: colors.isLight
+                                ? const Color(0xFF53627A)
+                                : colors.muted,
+                            fontSize: 17,
+                            height: 1.45,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 18),
+                  _CrmHelpButton(onTap: onHelp),
+                ],
+              ),
+              const SizedBox(height: 44),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final stacked = constraints.maxWidth < 850;
+                  final gap = stacked ? 22.0 : 48.0;
+                  final width = stacked
+                      ? constraints.maxWidth
+                      : (constraints.maxWidth - gap) / 2;
+                  return Wrap(
+                    spacing: gap,
+                    runSpacing: gap,
+                    alignment: WrapAlignment.center,
+                    children: [
+                      _CrmModuleCard(
+                        width: width,
+                        icon: Icons.workspace_premium_outlined,
+                        label: 'Abonnements',
+                        note:
+                            'Clients abonnés, plans, paiements,\npassages et fin de contrat.',
+                        metrics: [
+                          _CrmModuleMetric(
+                            icon: Icons.person_outline_rounded,
+                            label: 'Clients abonnés',
+                            value: loading ? '...' : '128',
+                          ),
+                          _CrmModuleMetric(
+                            icon: Icons.calendar_month_outlined,
+                            label: 'Plans actifs',
+                            value: loading ? '...' : '42',
+                          ),
+                          _CrmModuleMetric(
+                            icon: Icons.description_outlined,
+                            label: 'Contrats en cours',
+                            value: loading ? '...' : '37',
+                          ),
+                        ],
+                        onTap: onOpenSubscriptions,
+                      ),
+                      _CrmModuleCard(
+                        width: width,
+                        icon: Icons.directions_car_filled_outlined,
+                        label: 'Voiture de courtoisie',
+                        note:
+                            'Suivi des voitures prêtées,\ndisponibilités et retours.',
+                        metrics: const [
+                          _CrmModuleMetric(
+                            icon: Icons.directions_car_filled_outlined,
+                            label: 'Véhicules disponibles',
+                            value: '12',
+                          ),
+                          _CrmModuleMetric(
+                            icon: Icons.access_time_rounded,
+                            label: 'En cours d’utilisation',
+                            value: '5',
+                          ),
+                          _CrmModuleMetric(
+                            icon: Icons.check_circle_outline_rounded,
+                            label: "Retours aujourd'hui",
+                            value: '3',
+                          ),
+                        ],
+                        onTap: onOpenCourtesy,
+                      ),
+                    ],
+                  );
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CrmHelpButton extends StatelessWidget {
+  const _CrmHelpButton({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    const navy = Color(0xFF061A4A);
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(10),
+        onTap: onTap,
+        child: Container(
+          height: 56,
+          padding: const EdgeInsets.symmetric(horizontal: 18),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: const Color(0xFFE4E9F2)),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x14061A4A),
+                blurRadius: 22,
+                offset: Offset(0, 10),
+              ),
+            ],
+          ),
+          child: const Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(Icons.help_outline_rounded, color: navy, size: 22),
+              SizedBox(width: 8),
+              Text(
+                'Aide',
+                style: TextStyle(
+                  color: navy,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _CrmModuleCard extends StatelessWidget {
   const _CrmModuleCard({
     required this.width,
     required this.icon,
     required this.label,
     required this.note,
+    required this.metrics,
     required this.onTap,
   });
 
@@ -352,76 +508,208 @@ class _CrmModuleCard extends StatelessWidget {
   final IconData icon;
   final String label;
   final String note;
+  final List<_CrmModuleMetric> metrics;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final colors = ClcThemeColors.of(context);
+    const navy = Color(0xFF061A4A);
+    const muted = Color(0xFF58657B);
 
     return SizedBox(
       width: width,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          child: Container(
-            constraints: const BoxConstraints(minHeight: 138),
-            padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: colors.field,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: colors.border),
+      height: width < 420 ? 520 : 492,
+      child: Container(
+        clipBehavior: Clip.antiAlias,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(color: const Color(0xFFE8ECF3)),
+          boxShadow: const [
+            BoxShadow(
+              color: Color(0x12061A4A),
+              blurRadius: 28,
+              offset: Offset(0, 14),
             ),
-            child: Stack(
-              children: [
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  top: 0,
-                  child: SizedBox(
-                    height: 3,
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(color: colors.border),
-                    ),
-                  ),
+          ],
+        ),
+        child: Column(
+          children: [
+            const SizedBox(
+              height: 9,
+              width: double.infinity,
+              child: DecoratedBox(decoration: BoxDecoration(color: navy)),
+            ),
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(
+                  width < 420 ? 24 : 42,
+                  30,
+                  width < 420 ? 24 : 42,
+                  28,
                 ),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Column(
                   children: [
                     Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: colors.surfaceRaised,
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: colors.border),
+                      width: 76,
+                      height: 76,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFF0F2F7),
+                        shape: BoxShape.circle,
                       ),
-                      child: Icon(icon, color: colors.focus, size: 21),
+                      child: Icon(icon, color: navy, size: 35),
                     ),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 22),
                     Text(
                       label.toUpperCase(),
-                      style: TextStyle(
-                        color: colors.textStrong,
-                        fontSize: 13,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: navy,
+                        fontSize: 16,
                         fontWeight: FontWeight.w900,
-                        letterSpacing: 2.2,
+                        letterSpacing: 1.6,
                       ),
                     ),
-                    const SizedBox(height: 9),
+                    const SizedBox(height: 18),
+                    const Divider(color: Color(0xFFDCE2EC), height: 1),
+                    const SizedBox(height: 18),
                     Text(
                       note,
-                      style: TextStyle(
-                        color: colors.mutedStrong,
-                        fontSize: 12,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        color: muted,
+                        fontSize: 12.5,
                         height: 1.45,
-                        fontWeight: FontWeight.w600,
+                        fontWeight: FontWeight.w500,
                       ),
                     ),
+                    const SizedBox(height: 24),
+                    for (final metric in metrics) ...[
+                      _CrmMetricRow(metric: metric),
+                      const SizedBox(height: 14),
+                    ],
+                    const Spacer(),
+                    _CrmOpenButton(label: 'Ouvrir', onTap: onTap),
                   ],
                 ),
-              ],
+              ),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CrmModuleMetric {
+  const _CrmModuleMetric({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+}
+
+class _CrmMetricRow extends StatelessWidget {
+  const _CrmMetricRow({required this.metric});
+
+  final _CrmModuleMetric metric;
+
+  @override
+  Widget build(BuildContext context) {
+    const navy = Color(0xFF061A4A);
+
+    return Row(
+      children: [
+        Container(
+          width: 34,
+          height: 34,
+          decoration: BoxDecoration(
+            color: const Color(0xFFF3F5F9),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: const Color(0xFFE3E8F1)),
+          ),
+          child: Icon(metric.icon, color: navy, size: 18),
+        ),
+        const SizedBox(width: 18),
+        Expanded(
+          child: Text(
+            metric.label,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: const TextStyle(
+              color: Color(0xFF34415A),
+              fontSize: 12.5,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+        const SizedBox(width: 14),
+        Text(
+          metric.value,
+          style: const TextStyle(
+            color: navy,
+            fontSize: 15,
+            fontWeight: FontWeight.w900,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _CrmOpenButton extends StatelessWidget {
+  const _CrmOpenButton({required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    const navy = Color(0xFF061A4A);
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(8),
+        onTap: onTap,
+        child: Container(
+          height: 54,
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          decoration: BoxDecoration(
+            color: navy,
+            borderRadius: BorderRadius.circular(8),
+            boxShadow: const [
+              BoxShadow(
+                color: Color(0x33061A4A),
+                blurRadius: 18,
+                offset: Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+              const Icon(
+                Icons.arrow_forward_rounded,
+                color: Colors.white,
+                size: 24,
+              ),
+            ],
           ),
         ),
       ),
