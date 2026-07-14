@@ -2,6 +2,7 @@ import 'package:car_luxe_cleaning_flutter/app/theme.dart';
 import 'package:car_luxe_cleaning_flutter/app/theme_scope.dart';
 import 'package:car_luxe_cleaning_flutter/features/auth/presentation/auth_scope.dart';
 import 'package:car_luxe_cleaning_flutter/shared/layout/responsive.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -83,16 +84,25 @@ class AppScaffold extends StatelessWidget {
         maintainBottomViewPadding: true,
         child: Row(
           children: [
-            if (!isMobile) _SideNavigation(currentPath: currentPath),
+            if (!isMobile)
+              _SideNavigation(currentPath: currentPath)
+                  .animate()
+                  .fadeIn(duration: 420.ms)
+                  .slideX(begin: -0.18, curve: Curves.easeOut),
             Expanded(
               child: Padding(
                 padding: EdgeInsets.zero,
                 child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 180),
-                  decoration: BoxDecoration(color: pageColor),
+                  duration: const Duration(milliseconds: 220),
+                  decoration: BoxDecoration(
+                    color: pageColor,
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(isMobile ? 0 : 32),
+                    ),
+                  ),
                   child: Padding(
                     padding: EdgeInsets.all(Responsive.pagePadding(context)),
-                    child: child,
+                    child: child.animate().fadeIn(duration: 420.ms, delay: 80.ms).moveY(begin: 18, curve: Curves.easeOut),
                   ),
                 ),
               ),
@@ -139,6 +149,13 @@ class _SideNavigationState extends State<_SideNavigation> {
       decoration: BoxDecoration(
         color: colors.shell,
         border: Border(right: BorderSide(color: colors.border)),
+        boxShadow: [
+          BoxShadow(
+            color: colors.focus.withValues(alpha: 0.08),
+            blurRadius: 28,
+            offset: const Offset(0, 16),
+          ),
+        ],
       ),
       child: Column(
         children: [
@@ -150,22 +167,24 @@ class _SideNavigationState extends State<_SideNavigation> {
           ),
           const SizedBox(height: 28),
           Expanded(
-            child: Center(
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  for (
-                    var index = 0;
-                    index < appNavItems.length;
-                    index += 1
-                  ) ...[
-                    _SidebarNavButton(
-                      item: appNavItems[index],
-                      active: appNavItems[index].path == widget.currentPath,
-                    ),
-                    if (index < appNavItems.length - 1) const _SidebarDivider(),
+            child: SingleChildScrollView(
+              child: Center(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    for (
+                      var index = 0;
+                      index < appNavItems.length;
+                      index += 1
+                    ) ...[
+                      _SidebarNavButton(
+                        item: appNavItems[index],
+                        active: appNavItems[index].path == widget.currentPath,
+                      ),
+                      if (index < appNavItems.length - 1) const _SidebarDivider(),
+                    ],
                   ],
-                ],
+                ),
               ),
             ),
           ),
@@ -231,19 +250,17 @@ class _BottomNavigationState extends State<_BottomNavigation> {
       top: false,
       minimum: const EdgeInsets.fromLTRB(14, 0, 14, 14),
       child: Container(
-        height: 68,
-        padding: const EdgeInsets.all(8),
+        height: 74,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
-          color: colors.shell.withValues(alpha: colors.isLight ? 0.96 : 0.95),
-          borderRadius: BorderRadius.circular(22),
-          border: Border.all(color: colors.border),
+          color: colors.shell.withValues(alpha: colors.isLight ? 0.98 : 0.92),
+          borderRadius: BorderRadius.circular(26),
+          border: Border.all(color: colors.borderStrong),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(
-                alpha: colors.isLight ? 0.14 : 0.40,
-              ),
-              blurRadius: 28,
-              offset: Offset(0, 16),
+              color: const Color(0x1A000000).withValues(alpha: colors.isLight ? 0.10 : 0.28),
+              blurRadius: 30,
+              offset: const Offset(0, 14),
             ),
           ],
         ),
@@ -313,17 +330,33 @@ class _SidebarNavButton extends StatelessWidget {
       message: item.label,
       child: InkWell(
         onTap: () => context.go(item.path),
+        borderRadius: BorderRadius.circular(18),
         child: SizedBox(
-          height: 56,
+          height: 64,
           width: 100,
           child: Stack(
             alignment: Alignment.center,
             children: [
+              Container(
+                height: 48,
+                width: 48,
+                decoration: BoxDecoration(
+                  color: active ? colors.focus : colors.surfaceSoft,
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: active
+                      ? [
+                          BoxShadow(
+                            color: colors.focus.withValues(alpha: 0.14),
+                            blurRadius: 18,
+                            offset: const Offset(0, 8),
+                          ),
+                        ]
+                      : null,
+                ),
+              ),
               Icon(
                 item.icon,
-                color: active
-                    ? colors.textStrong
-                    : colors.muted.withValues(alpha: 0.82),
+                color: active ? colors.onFocus : colors.muted.withValues(alpha: 0.86),
                 size: 24,
               ),
               if (active)
@@ -331,15 +364,18 @@ class _SidebarNavButton extends StatelessWidget {
                   left: 0,
                   child: SizedBox(
                     width: 4,
-                    height: 32,
+                    height: 36,
                     child: DecoratedBox(
-                      decoration: BoxDecoration(color: colors.focus),
+                      decoration: BoxDecoration(
+                        color: colors.focus,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
                   ),
                 ),
             ],
           ),
-        ),
+        ).animate().fadeIn(duration: 380.ms).moveY(begin: 6, curve: Curves.easeOut),
       ),
     );
   }
@@ -441,7 +477,7 @@ class _MobileNavButton extends StatelessWidget {
                 ),
             ],
           ),
-        ),
+        ).animate().fadeIn(duration: 360.ms).moveY(begin: 8, curve: Curves.easeOut),
       ),
     );
   }

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:car_luxe_cleaning_flutter/app/theme.dart';
 import 'package:car_luxe_cleaning_flutter/core/widgets/app_button.dart';
 import 'package:car_luxe_cleaning_flutter/core/widgets/app_card.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:car_luxe_cleaning_flutter/features/basket/data/service_catalog.dart';
 import 'package:car_luxe_cleaning_flutter/features/clients/data/client_repository.dart';
 import 'package:car_luxe_cleaning_flutter/features/clients/domain/client_vehicle_bundle.dart';
@@ -15,9 +16,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:printing/printing.dart';
-
-const _basketLightPrestation = Color(0xFFE2E8F0);
-const _basketLightPrestationBorder = Color(0xFFD8DEE8);
 const _basketDarkChoice = Color(0xFF111827);
 const _basketAccent = Color(0xFFAFF700);
 
@@ -2285,7 +2283,6 @@ class _CategoryOpenStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = ClcThemeColors.of(context);
     const categories = [
       _PrestationCategory(
         id: 'interior',
@@ -2300,10 +2297,20 @@ class _CategoryOpenStep extends StatelessWidget {
       ),
     ];
 
-    return AppCard(
-      color: colors.isLight ? colors.surfaceRaised : colors.shell,
-      borderColor: colors.border,
+    return Container(
+      margin: const EdgeInsets.symmetric(vertical: 6),
       padding: const EdgeInsets.all(30),
+      decoration: BoxDecoration(
+        color: const Color(0xFF18181B),
+        borderRadius: BorderRadius.circular(28),
+        boxShadow: const [
+          BoxShadow(
+            color: Color.fromRGBO(0, 0, 0, 0.5),
+            blurRadius: 40,
+            offset: Offset(0, 10),
+          ),
+        ],
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -2311,18 +2318,30 @@ class _CategoryOpenStep extends StatelessWidget {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 24),
             decoration: BoxDecoration(
-              color: colors.field,
-              borderRadius: BorderRadius.circular(8),
-              border: Border.all(color: colors.border),
+              color: const Color(0xFF121214),
+              borderRadius: BorderRadius.circular(24),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('CATEGORIE DE PRESTATION', style: _sectionTitle(context)),
+                Text(
+                  'CATEGORIE DE PRESTATION',
+                  style: GoogleFonts.inter(
+                    color: Colors.white,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 2.4,
+                  ),
+                ),
                 const SizedBox(height: 8),
                 Text(
                   'Selectionnez la categorie de travaux pour continuer.',
-                  style: AppTextStyles.body.copyWith(color: colors.muted),
+                  style: GoogleFonts.inter(
+                    color: const Color(0xFFFFFFFF).withValues(alpha: 0.5),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    height: 1.5,
+                  ),
                 ),
               ],
             ),
@@ -2381,82 +2400,87 @@ class _CategoryLaunchCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = ClcThemeColors.of(context);
-    final background = colors.isLight
-        ? _basketLightPrestation
-        : colors.surfaceRaised;
-    final borderColor = colors.isLight
-        ? _basketLightPrestationBorder
-        : colors.surfaceRaised;
-
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(28),
         onTap: onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
-          constraints: const BoxConstraints(minHeight: 132),
-          padding: const EdgeInsets.all(22),
+          constraints: const BoxConstraints(minHeight: 150),
+          padding: const EdgeInsets.all(28),
           decoration: BoxDecoration(
-            color: active ? background : colors.field,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: active ? borderColor : colors.border),
-            boxShadow: colors.isLight
-                ? const [
-                    BoxShadow(
-                      color: Color(0x12111827),
-                      blurRadius: 24,
-                      offset: Offset(0, 10),
-                    ),
-                  ]
-                : const [
-                    BoxShadow(
-                      color: Color(0x33000000),
-                      blurRadius: 24,
-                      offset: Offset(0, 10),
-                    ),
-                  ],
+            color: const Color(0xFF18181B),
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: const [
+              BoxShadow(
+                color: Color.fromRGBO(0, 0, 0, 0.5),
+                blurRadius: 40,
+                offset: Offset(0, 10),
+              ),
+            ],
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                category.label.toUpperCase(),
-                style: TextStyle(
-                  color: colors.textStrong,
-                  fontSize: 13,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: 1.4,
-                ),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: Text(
+                      category.label.toUpperCase(),
+                      style: GoogleFonts.inter(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 1.5,
+                      ),
+                    ),
+                  ),
+                  Container(
+                    width: 12,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFAFF700),
+                      shape: BoxShape.circle,
+                      boxShadow: const [
+                        BoxShadow(
+                          color: Color(0xFF91C100),
+                          blurRadius: 22,
+                          spreadRadius: 6,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 14),
               Text(
                 category.description,
-                style: TextStyle(
-                  color: colors.muted,
-                  fontSize: 12,
-                  height: 1.35,
-                  fontWeight: FontWeight.w600,
+                style: GoogleFonts.inter(
+                  color: const Color(0xFFFFFFFF).withValues(alpha: 0.5),
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                  height: 1.55,
                 ),
               ),
-              const SizedBox(height: 22),
+              const Spacer(),
               Row(
                 children: [
                   Text(
                     'LANCER',
-                    style: TextStyle(
-                      color: colors.muted,
-                      fontSize: 10.5,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 1.2,
+                    style: GoogleFonts.inter(
+                      color: const Color(0xFFAFF700),
+                      fontSize: 11,
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: 1.8,
                     ),
                   ),
-                  const SizedBox(width: 5),
+                  const SizedBox(width: 8),
                   Icon(
                     Icons.arrow_forward_rounded,
-                    color: colors.muted,
-                    size: 13,
+                    color: const Color(0xFFAFF700),
+                    size: 16,
                   ),
                 ],
               ),

@@ -161,19 +161,19 @@ class ClcThemeColors extends ThemeExtension<ClcThemeColors> {
 class AppColors {
   const AppColors._();
 
-  static const navy = Color(0xFF111827);
-  static const ink = Color(0xFF050505);
-  static const text = Color(0xFFF4F4F5);
-  static const muted = Color(0xFFA1A1AA);
-  static const border = Color(0x1AFFFFFF);
-  static const background = Color(0xFF050505);
-  static const surface = Color(0xFF1F1F1F);
-  static const surfaceMuted = Color(0xFF161616);
-  static const surfaceRaised = Color(0xFF232323);
-  static const gold = Color(0xFFCA8A04);
-  static const danger = Color(0xFFFB7185);
+  static const navy = Color(0xFF0F172A);
+  static const ink = Color(0xFF030712);
+  static const text = Color(0xFFF8FAFC);
+  static const muted = Color(0xFF94A3B8);
+  static const border = Color(0xFFCBD5E1);
+  static const background = Color(0xFF090B17);
+  static const surface = Color(0xFF111827);
+  static const surfaceMuted = Color(0xFF0F172A);
+  static const surfaceRaised = Color(0xFF1E293B);
+  static const gold = Color(0xFFEAB308);
+  static const danger = Color(0xFFEF4444);
   static const success = Color(0xFF22C55E);
-  static const accent = Color(0xFFAFF700);
+  static const accent = Color(0xFF818CF8);
 }
 
 class AppSpacing {
@@ -213,29 +213,44 @@ class AppTextStyles {
   static const eyebrow = TextStyle(
     fontSize: 11,
     fontWeight: FontWeight.w900,
-    letterSpacing: 4,
+    letterSpacing: 3.2,
     color: AppColors.muted,
   );
 
   static const pageTitle = TextStyle(
-    fontSize: 44,
-    height: 0.95,
-    fontWeight: FontWeight.w300,
+    fontSize: 42,
+    height: 1.05,
+    fontWeight: FontWeight.w400,
     letterSpacing: 0,
     color: AppColors.text,
   );
 
   static const cardTitle = TextStyle(
-    fontSize: 19,
-    fontWeight: FontWeight.w900,
-    letterSpacing: -0.1,
+    fontSize: 20,
+    fontWeight: FontWeight.w800,
+    letterSpacing: -0.2,
+    color: AppColors.text,
+  );
+
+  static const sectionTitle = TextStyle(
+    fontSize: 18,
+    height: 1.3,
+    fontWeight: FontWeight.w800,
     color: AppColors.text,
   );
 
   static const body = TextStyle(
     fontSize: 15,
-    height: 1.45,
+    height: 1.6,
     fontWeight: FontWeight.w500,
+    color: AppColors.muted,
+  );
+
+  static const label = TextStyle(
+    fontSize: 12,
+    height: 1.4,
+    fontWeight: FontWeight.w900,
+    letterSpacing: 1.4,
     color: AppColors.muted,
   );
 }
@@ -255,46 +270,101 @@ class AppTheme {
     final base = ThemeData(
       useMaterial3: true,
       fontFamily: 'Inter',
+      brightness: brightness,
       colorScheme: ColorScheme.fromSeed(
         seedColor: colors.focus,
         brightness: brightness,
         surface: colors.surface,
+        primary: colors.focus,
+        onPrimary: colors.onFocus,
+        onSurface: colors.text,
       ),
-    );
-
-    return base.copyWith(
-      extensions: <ThemeExtension<dynamic>>[colors],
       scaffoldBackgroundColor: colors.bg,
-      textTheme: base.textTheme.apply(
+      appBarTheme: AppBarTheme(
+        backgroundColor: colors.shell,
+        surfaceTintColor: colors.shell,
+        elevation: 0,
+        centerTitle: false,
+        titleTextStyle: AppTextStyles.cardTitle.copyWith(color: colors.textStrong),
+        iconTheme: IconThemeData(color: colors.textStrong),
+      ),
+      cardTheme: CardThemeData(
+        color: colors.surfaceRaised,
+        elevation: 14,
+        shadowColor: colors.focus.withValues(alpha: 0.12),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+      ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: colors.focus,
+          foregroundColor: colors.onFocus,
+          disabledBackgroundColor: colors.surfaceSoft,
+          disabledForegroundColor: colors.muted,
+          elevation: 14,
+          shadowColor: colors.focus.withValues(alpha: 0.18),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
+          textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, letterSpacing: 1.6),
+        ),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          backgroundColor: colors.surfaceSoft,
+          foregroundColor: colors.textStrong,
+          disabledBackgroundColor: colors.surfaceSoft,
+          disabledForegroundColor: colors.muted,
+          elevation: 0,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
+          textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, letterSpacing: 1.6),
+        ),
+      ),
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          foregroundColor: colors.focus,
+          textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, letterSpacing: 1.5),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        ),
+      ),
+      cardColor: colors.surfaceRaised,
+      canvasColor: colors.shell,
+      iconTheme: IconThemeData(color: colors.text, size: 22),
+      textTheme: ThemeData(brightness: brightness).textTheme.apply(
         bodyColor: colors.text,
         displayColor: colors.text,
         fontFamily: 'Inter',
       ),
-      iconTheme: IconThemeData(color: colors.text, size: 22),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: colors.field,
+        fillColor: colors.surfaceSoft,
         border: OutlineInputBorder(
           borderSide: BorderSide(color: colors.border),
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(18),
         ),
         enabledBorder: OutlineInputBorder(
           borderSide: BorderSide(color: colors.border),
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(18),
         ),
         focusedBorder: OutlineInputBorder(
-          borderSide: BorderSide(color: colors.focus, width: 1.4),
-          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: colors.focus, width: 1.6),
+          borderRadius: BorderRadius.circular(18),
         ),
         contentPadding: const EdgeInsets.symmetric(
-          horizontal: 20,
+          horizontal: 22,
           vertical: 18,
         ),
-        labelStyle: AppTextStyles.eyebrow.copyWith(
-          color: colors.muted,
-          letterSpacing: 2,
-        ),
+        labelStyle: AppTextStyles.label.copyWith(color: colors.muted),
       ),
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: colors.surfaceRaised,
+        contentTextStyle: TextStyle(color: colors.text),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      ),
+      dividerTheme: DividerThemeData(color: colors.border, thickness: 1, space: 28),
+    );
+
+    return base.copyWith(
+      extensions: <ThemeExtension<dynamic>>[colors],
     );
   }
 }

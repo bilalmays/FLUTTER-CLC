@@ -1,5 +1,6 @@
 import 'package:car_luxe_cleaning_flutter/app/theme.dart';
 import 'package:car_luxe_cleaning_flutter/core/widgets/app_button.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter/material.dart';
 
 class AuthLoginPage extends StatefulWidget {
@@ -53,99 +54,113 @@ class _AuthLoginPageState extends State<AuthLoginPage> {
                 padding: const EdgeInsets.all(24),
                 child: ConstrainedBox(
                   constraints: const BoxConstraints(maxWidth: 440),
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      color: colors.field,
-                      border: Border.all(color: colors.border),
-                      borderRadius: BorderRadius.circular(8),
-                      boxShadow: [
-                        BoxShadow(
-                          color: colors.textStrong.withValues(
-                            alpha: colors.isLight ? 0.12 : 0.60,
-                          ),
-                          blurRadius: 42,
-                          offset: const Offset(0, 22),
-                        ),
-                      ],
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(30),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const _AuthHeader(),
-                          const SizedBox(height: 30),
-                          TextField(
-                            controller: _codeController,
-                            autofocus: true,
-                            obscureText: true,
-                            autofillHints: const [AutofillHints.password],
-                            textInputAction: TextInputAction.done,
-                            onSubmitted: (_) => _submit(),
-                            onChanged: (_) {
-                              if (_error != null) {
-                                setState(() => _error = null);
-                              }
-                            },
-                            style: TextStyle(
-                              color: colors.textStrong,
-                              fontWeight: FontWeight.w800,
-                            ),
-                            decoration: InputDecoration(
-                              labelText: "CODE D'ACCES",
-                              hintText: 'Code interne',
-                              hintStyle: TextStyle(
-                                color: colors.muted.withValues(alpha: 0.55),
-                              ),
-                              filled: true,
-                              fillColor: colors.surfaceRaised,
-                              prefixIcon: Icon(
-                                Icons.lock_outline_rounded,
-                                color: colors.focus,
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: BorderSide(color: colors.border),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
-                                borderSide: BorderSide(
-                                  color: colors.focus,
-                                  width: 1.4,
-                                ),
-                              ),
-                            ),
-                          ),
-                          if (_error != null) ...[
-                            const SizedBox(height: 14),
-                            Container(
-                              width: double.infinity,
-                              padding: const EdgeInsets.all(14),
-                              decoration: BoxDecoration(
-                                color: colors.danger.withValues(alpha: 0.08),
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(
-                                  color: colors.danger.withValues(alpha: 0.25),
-                                ),
-                              ),
-                              child: Text(
-                                _error!,
-                                style: TextStyle(
-                                  color: colors.danger,
-                                  fontWeight: FontWeight.w800,
-                                ),
-                              ),
-                            ),
-                          ],
-                          const SizedBox(height: 22),
-                          AppButton(
-                            label: _loading ? 'Connexion...' : 'Se connecter',
-                            icon: Icons.lock_open_rounded,
-                            expanded: true,
-                            onPressed: _loading ? null : _submit,
+                  child: Animate(
+                    effects: [
+                      FadeEffect(duration: 520.ms),
+                      ScaleEffect(begin: const Offset(0.98, 0.98), end: const Offset(1, 1), curve: Curves.easeOut),
+                    ],
+                    child: DecoratedBox(
+                      decoration: BoxDecoration(
+                        color: colors.surfaceRaised,
+                        border: Border.all(color: colors.borderStrong),
+                        borderRadius: BorderRadius.circular(24),
+                        boxShadow: [
+                          BoxShadow(
+                            color: colors.focus.withValues(alpha: 0.12),
+                            blurRadius: 42,
+                            offset: const Offset(0, 26),
                           ),
                         ],
+                        gradient: colors.isLight
+                            ? null
+                            : RadialGradient(
+                                center: const Alignment(-0.7, -0.8),
+                                radius: 1.4,
+                                colors: [
+                                  colors.surfaceRaised,
+                                  colors.surface.withValues(alpha: 0.88),
+                                ],
+                              ),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(32),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _AuthHeader().animate().fadeIn(duration: 450.ms).moveY(begin: 12, curve: Curves.easeOut),
+                            const SizedBox(height: 30),
+                            TextField(
+                              controller: _codeController,
+                              autofocus: true,
+                              obscureText: true,
+                              autofillHints: const [AutofillHints.password],
+                              textInputAction: TextInputAction.done,
+                              onSubmitted: (_) => _submit(),
+                              onChanged: (_) {
+                                if (_error != null) {
+                                  setState(() => _error = null);
+                                }
+                              },
+                              style: TextStyle(
+                                color: colors.textStrong,
+                                fontWeight: FontWeight.w800,
+                              ),
+                              decoration: InputDecoration(
+                                labelText: "CODE D'ACCES",
+                                hintText: 'Code interne',
+                                hintStyle: TextStyle(
+                                  color: colors.muted.withValues(alpha: 0.65),
+                                ),
+                                filled: true,
+                                fillColor: colors.surfaceSoft,
+                                prefixIcon: Icon(
+                                  Icons.lock_outline_rounded,
+                                  color: colors.focus,
+                                ),
+                                enabledBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(18),
+                                  borderSide: BorderSide(color: colors.border),
+                                ),
+                                focusedBorder: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(18),
+                                  borderSide: BorderSide(
+                                    color: colors.focus,
+                                    width: 1.6,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            if (_error != null) ...[
+                              const SizedBox(height: 14),
+                              Container(
+                                width: double.infinity,
+                                padding: const EdgeInsets.all(14),
+                                decoration: BoxDecoration(
+                                  color: colors.danger.withValues(alpha: 0.08),
+                                  borderRadius: BorderRadius.circular(8),
+                                  border: Border.all(
+                                    color: colors.danger.withValues(alpha: 0.25),
+                                  ),
+                                ),
+                                child: Text(
+                                  _error!,
+                                  style: TextStyle(
+                                    color: colors.danger,
+                                    fontWeight: FontWeight.w800,
+                                  ),
+                                ),
+                              ),
+                            ],
+                            const SizedBox(height: 22),
+                            AppButton(
+                              label: _loading ? 'Connexion...' : 'Se connecter',
+                              icon: Icons.lock_open_rounded,
+                              expanded: true,
+                              onPressed: _loading ? null : _submit,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),

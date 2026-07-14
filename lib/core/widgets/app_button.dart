@@ -34,26 +34,26 @@ class AppButton extends StatelessWidget {
         : colors.border;
 
     final child = ConstrainedBox(
-      constraints: const BoxConstraints(minHeight: 52, minWidth: 52),
+      constraints: const BoxConstraints(minHeight: 56, minWidth: 56),
       child: FilledButton.icon(
         style: FilledButton.styleFrom(
           backgroundColor: background,
           foregroundColor: foreground,
           disabledBackgroundColor: colors.surfaceSoft,
           disabledForegroundColor: colors.muted,
-          elevation: isPrimary ? 10 : 0,
+          elevation: isPrimary ? 14 : 0,
           shadowColor: isPrimary
-              ? colors.focus.withValues(alpha: colors.isLight ? 0.14 : 0.22)
+              ? colors.focus.withValues(alpha: colors.isLight ? 0.18 : 0.30)
               : Colors.transparent,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(2),
-            side: BorderSide(color: borderColor),
+            borderRadius: BorderRadius.circular(18),
+            side: BorderSide(color: borderColor, width: isPrimary ? 0 : 1),
           ),
-          padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
           textStyle: const TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.w900,
-            letterSpacing: 1.8,
+            fontSize: 13,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 1.6,
           ),
         ),
         onPressed: onPressed,
