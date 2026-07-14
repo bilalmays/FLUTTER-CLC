@@ -2,7 +2,8 @@ import 'package:car_luxe_cleaning_flutter/app/theme.dart';
 import 'package:car_luxe_cleaning_flutter/app/theme_scope.dart';
 import 'package:car_luxe_cleaning_flutter/features/auth/presentation/auth_scope.dart';
 import 'package:car_luxe_cleaning_flutter/shared/layout/responsive.dart';
-import 'package:flutter_animate/flutter_animate.dart';
+import 'package:adaptive_platform_ui/adaptive_platform_ui.dart';
+import 'package:blurrycontainer/blurrycontainer.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -84,11 +85,7 @@ class AppScaffold extends StatelessWidget {
         maintainBottomViewPadding: true,
         child: Row(
           children: [
-            if (!isMobile)
-              _SideNavigation(currentPath: currentPath)
-                  .animate()
-                  .fadeIn(duration: 420.ms)
-                  .slideX(begin: -0.18, curve: Curves.easeOut),
+            if (!isMobile) _SideNavigation(currentPath: currentPath),
             Expanded(
               child: Padding(
                 padding: EdgeInsets.zero,
@@ -102,7 +99,7 @@ class AppScaffold extends StatelessWidget {
                   ),
                   child: Padding(
                     padding: EdgeInsets.all(Responsive.pagePadding(context)),
-                    child: child.animate().fadeIn(duration: 420.ms, delay: 80.ms).moveY(begin: 18, curve: Curves.easeOut),
+                    child: child,
                   ),
                 ),
               ),
@@ -142,80 +139,76 @@ class _SideNavigationState extends State<_SideNavigation> {
   Widget build(BuildContext context) {
     final colors = ClcThemeColors.of(context);
     final themeScope = AppThemeScope.of(context);
-    return AnimatedContainer(
-      duration: const Duration(milliseconds: 180),
-      width: 100,
-      margin: const EdgeInsets.all(0),
-      decoration: BoxDecoration(
-        color: colors.shell,
-        border: Border(right: BorderSide(color: colors.border)),
-        boxShadow: [
-          BoxShadow(
-            color: colors.focus.withValues(alpha: 0.08),
-            blurRadius: 28,
-            offset: const Offset(0, 16),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          const SizedBox(height: 24),
-          SizedBox(
-            width: 56,
-            height: 56,
-            child: Image.asset('assets/clc-logo.png', fit: BoxFit.contain),
-          ),
-          const SizedBox(height: 28),
-          Expanded(
-            child: SingleChildScrollView(
-              child: Center(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    for (
-                      var index = 0;
-                      index < appNavItems.length;
-                      index += 1
-                    ) ...[
-                      _SidebarNavButton(
-                        item: appNavItems[index],
-                        active: appNavItems[index].path == widget.currentPath,
-                      ),
-                      if (index < appNavItems.length - 1) const _SidebarDivider(),
+    return AdaptiveBlurView(
+      blurStyle: BlurStyle.systemUltraThinMaterial,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 120),
+        width: 100,
+        margin: const EdgeInsets.all(0),
+        decoration: BoxDecoration(
+          color: colors.shell.withValues(alpha: colors.isLight ? 0.92 : 0.86),
+          border: Border(right: BorderSide(color: colors.border)),
+        ),
+        child: Column(
+          children: [
+            const SizedBox(height: 24),
+            SizedBox(
+              width: 56,
+              height: 56,
+              child: Image.asset('assets/clc-logo.png', fit: BoxFit.contain),
+            ),
+            const SizedBox(height: 28),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Center(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      for (
+                        var index = 0;
+                        index < appNavItems.length;
+                        index += 1
+                      ) ...[
+                        _SidebarNavButton(
+                          item: appNavItems[index],
+                          active: appNavItems[index].path == widget.currentPath,
+                        ),
+                        if (index < appNavItems.length - 1)
+                          const _SidebarDivider(),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
               ),
             ),
-          ),
-          SizedBox(
-            width: 8,
-            height: 8,
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: colors.focus,
-                shape: BoxShape.circle,
-                boxShadow: [BoxShadow(color: colors.focus, blurRadius: 8)],
+            SizedBox(
+              width: 8,
+              height: 8,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: colors.focus,
+                  shape: BoxShape.circle,
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 26),
-          _SidebarActionButton(
-            icon: themeScope.isLight
-                ? Icons.dark_mode_outlined
-                : Icons.light_mode_outlined,
-            label: themeScope.isLight ? 'Mode sombre' : 'Mode clair',
-            onTap: _handleThemeTap,
-          ),
-          const SizedBox(height: 22),
-          _SidebarActionButton(
-            icon: appSettingsItem.icon,
-            label: appSettingsItem.label,
-            active: widget.currentPath == appSettingsItem.path,
-            onTap: () => context.go(appSettingsItem.path),
-          ),
-          const SizedBox(height: 22),
-        ],
+            const SizedBox(height: 26),
+            _SidebarActionButton(
+              icon: themeScope.isLight
+                  ? Icons.dark_mode_outlined
+                  : Icons.light_mode_outlined,
+              label: themeScope.isLight ? 'Mode sombre' : 'Mode clair',
+              onTap: _handleThemeTap,
+            ),
+            const SizedBox(height: 22),
+            _SidebarActionButton(
+              icon: appSettingsItem.icon,
+              label: appSettingsItem.label,
+              active: widget.currentPath == appSettingsItem.path,
+              onTap: () => context.go(appSettingsItem.path),
+            ),
+            const SizedBox(height: 22),
+          ],
+        ),
       ),
     );
   }
@@ -249,40 +242,37 @@ class _BottomNavigationState extends State<_BottomNavigation> {
     return SafeArea(
       top: false,
       minimum: const EdgeInsets.fromLTRB(14, 0, 14, 14),
-      child: Container(
+      child: BlurryContainer(
         height: 74,
+        blur: 10,
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-        decoration: BoxDecoration(
-          color: colors.shell.withValues(alpha: colors.isLight ? 0.98 : 0.92),
-          borderRadius: BorderRadius.circular(26),
-          border: Border.all(color: colors.borderStrong),
-          boxShadow: [
-            BoxShadow(
-              color: const Color(0x1A000000).withValues(alpha: colors.isLight ? 0.10 : 0.28),
-              blurRadius: 30,
-              offset: const Offset(0, 14),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            for (final item in [...appNavItems, appSettingsItem])
+        color: colors.shell.withValues(alpha: colors.isLight ? 0.82 : 0.76),
+        borderRadius: const BorderRadius.all(Radius.circular(8)),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: colors.borderStrong),
+          ),
+          child: Row(
+            children: [
+              for (final item in [...appNavItems, appSettingsItem])
+                Expanded(
+                  child: _MobileNavButton(
+                    item: item,
+                    active: item.path == widget.currentPath,
+                  ),
+                ),
               Expanded(
-                child: _MobileNavButton(
-                  item: item,
-                  active: item.path == widget.currentPath,
+                child: _MobileActionButton(
+                  icon: themeScope.isLight
+                      ? Icons.dark_mode_outlined
+                      : Icons.light_mode_outlined,
+                  label: themeScope.isLight ? 'Mode sombre' : 'Mode clair',
+                  onTap: _handleThemeTap,
                 ),
               ),
-            Expanded(
-              child: _MobileActionButton(
-                icon: themeScope.isLight
-                    ? Icons.dark_mode_outlined
-                    : Icons.light_mode_outlined,
-                label: themeScope.isLight ? 'Mode sombre' : 'Mode clair',
-                onTap: _handleThemeTap,
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -356,7 +346,9 @@ class _SidebarNavButton extends StatelessWidget {
               ),
               Icon(
                 item.icon,
-                color: active ? colors.onFocus : colors.muted.withValues(alpha: 0.86),
+                color: active
+                    ? colors.onFocus
+                    : colors.muted.withValues(alpha: 0.86),
                 size: 24,
               ),
               if (active)
@@ -375,7 +367,7 @@ class _SidebarNavButton extends StatelessWidget {
                 ),
             ],
           ),
-        ).animate().fadeIn(duration: 380.ms).moveY(begin: 6, curve: Curves.easeOut),
+        ),
       ),
     );
   }
@@ -477,7 +469,7 @@ class _MobileNavButton extends StatelessWidget {
                 ),
             ],
           ),
-        ).animate().fadeIn(duration: 360.ms).moveY(begin: 8, curve: Curves.easeOut),
+        ),
       ),
     );
   }

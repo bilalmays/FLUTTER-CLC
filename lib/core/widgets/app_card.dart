@@ -1,5 +1,6 @@
 import 'package:car_luxe_cleaning_flutter/app/theme.dart';
 import 'package:flutter/material.dart';
+import 'package:forui/forui.dart';
 
 class AppCard extends StatelessWidget {
   const AppCard({
@@ -22,16 +23,24 @@ class AppCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = ClcThemeColors.of(context);
-    final card = Container(
-      margin: margin,
-      padding: padding,
-      decoration: BoxDecoration(
-        color: color ?? colors.field,
-        borderRadius: BorderRadius.circular(2),
-        border: Border.all(color: borderColor ?? colors.border),
-        boxShadow: colors.isLight ? AppShadows.soft : const [],
+    final foruiCard = FTheme.of(context).cardStyle;
+    final card = Padding(
+      padding: margin ?? EdgeInsets.zero,
+      child: FCard(
+        style: FCardStyle(
+          decoration: BoxDecoration(
+            color: color ?? colors.field,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: borderColor ?? colors.border),
+            boxShadow: colors.isLight ? AppShadows.soft : const [],
+          ),
+          titleTextStyle: foruiCard.titleTextStyle,
+          subtitleTextStyle: foruiCard.subtitleTextStyle,
+          padding: EdgeInsets.zero,
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Padding(padding: padding, child: child),
       ),
-      child: child,
     );
 
     if (onTap == null) return card;
@@ -39,7 +48,7 @@ class AppCard extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(2),
+        borderRadius: BorderRadius.circular(8),
         onTap: onTap,
         child: card,
       ),

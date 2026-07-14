@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:car_luxe_cleaning_flutter/app/theme.dart';
 import 'package:car_luxe_cleaning_flutter/core/widgets/app_button.dart';
 import 'package:car_luxe_cleaning_flutter/core/widgets/app_card.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:car_luxe_cleaning_flutter/features/basket/data/service_catalog.dart';
 import 'package:car_luxe_cleaning_flutter/features/clients/data/client_repository.dart';
 import 'package:car_luxe_cleaning_flutter/features/clients/domain/client_vehicle_bundle.dart';
@@ -16,6 +15,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:printing/printing.dart';
+
 const _basketDarkChoice = Color(0xFF111827);
 const _basketAccent = Color(0xFFAFF700);
 
@@ -2326,7 +2326,7 @@ class _CategoryOpenStep extends StatelessWidget {
               children: [
                 Text(
                   'CATEGORIE DE PRESTATION',
-                  style: GoogleFonts.inter(
+                  style: const TextStyle(
                     color: Colors.white,
                     fontSize: 12,
                     fontWeight: FontWeight.w700,
@@ -2336,7 +2336,7 @@ class _CategoryOpenStep extends StatelessWidget {
                 const SizedBox(height: 8),
                 Text(
                   'Selectionnez la categorie de travaux pour continuer.',
-                  style: GoogleFonts.inter(
+                  style: TextStyle(
                     color: const Color(0xFFFFFFFF).withValues(alpha: 0.5),
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
@@ -2403,22 +2403,15 @@ class _CategoryLaunchCard extends StatelessWidget {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(8),
         onTap: onTap,
         child: AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
+          duration: const Duration(milliseconds: 120),
           constraints: const BoxConstraints(minHeight: 150),
-          padding: const EdgeInsets.all(28),
+          padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
             color: const Color(0xFF18181B),
-            borderRadius: BorderRadius.circular(28),
-            boxShadow: const [
-              BoxShadow(
-                color: Color.fromRGBO(0, 0, 0, 0.5),
-                blurRadius: 40,
-                offset: Offset(0, 10),
-              ),
-            ],
+            borderRadius: BorderRadius.circular(8),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -2429,7 +2422,7 @@ class _CategoryLaunchCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       category.label.toUpperCase(),
-                      style: GoogleFonts.inter(
+                      style: const TextStyle(
                         color: Colors.white,
                         fontSize: 16,
                         fontWeight: FontWeight.w800,
@@ -2457,20 +2450,20 @@ class _CategoryLaunchCard extends StatelessWidget {
               const SizedBox(height: 14),
               Text(
                 category.description,
-                style: GoogleFonts.inter(
+                style: TextStyle(
                   color: const Color(0xFFFFFFFF).withValues(alpha: 0.5),
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
                   height: 1.55,
                 ),
               ),
-              const Spacer(),
+              const SizedBox(height: 18),
               Row(
                 children: [
                   Text(
                     'LANCER',
-                    style: GoogleFonts.inter(
-                      color: const Color(0xFFAFF700),
+                    style: const TextStyle(
+                      color: Color(0xFFAFF700),
                       fontSize: 11,
                       fontWeight: FontWeight.w800,
                       letterSpacing: 1.8,
